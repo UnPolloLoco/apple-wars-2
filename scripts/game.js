@@ -9,27 +9,31 @@ const player = add([
 	z(1),
 ])
 
-let arena_width = ARENA_DIMENSIONS[0];
-let arena_height = ARENA_DIMENSIONS[1];
+let arenaWidth = ARENA.DIMENSIONS[0];
+let arenaHeight = ARENA.DIMENSIONS[1];
 
-for (let x = 0; x < arena_width; x++) {
-	for (let y = 0; y < arena_height; y++) {
+for (let x = 0; x < arenaWidth; x++) {
+	for (let y = 0; y < arenaHeight; y++) {
 		add([
 			sprite('grass'),
 			color(GREEN),
 			pos(
-				UNIT*ARENA_TILE_SIZE * (x - arena_width/2 + 0.5),
-				UNIT*ARENA_TILE_SIZE * (y - arena_height/2 + 0.5),
+				UNIT*ARENA.TILE_SIZE * (x - arenaWidth/2 + 0.5),
+				UNIT*ARENA.TILE_SIZE * (y - arenaHeight/2 + 0.5),
 			),
-			scale(UNIT/800 * ARENA_TILE_SIZE),
+			scale(UNIT/800 * ARENA.TILE_SIZE),
 			offscreen({ 
 				hide: true,
-				distance: UNIT*ARENA_TILE_SIZE,
+				distance: UNIT*ARENA.TILE_SIZE,
 			}),
 			anchor('center'),
 		])
 	}
 }
+
+
+
+
 
 onButtonPress('shoot', () => {
 	add([
@@ -43,6 +47,8 @@ onButtonPress('shoot', () => {
 	])
 })
 
+// Movement
+
 onMouseMove(() => {
 	player.angle = toWorld(mousePos()).angle(player.pos) - 90;
 })
@@ -50,21 +56,40 @@ onMouseMove(() => {
 onMouseDown(() => {
 	player.pos = player.pos.add(
 		Vec2.fromAngle(player.angle + 90)
-		.scale(UNIT * dt() * PLAYER_SPEED)
+		.scale(UNIT * dt() * PLAYER.SPEED)
 	);
-
-	setCamPos(player.pos);
 })
+
+
+
+
 
 onUpdate(() => {
 
-	let target_cam_scale = 1 - isMouseDown() * CAM_ZOOM_MAGNITUDE;
+	// Camera zoom effect
+
+	let targetCamScale = 1 - isMouseDown() * CAMERA.ZOOM.MAGNITUDE;
 	setCamScale(
 		vec2(
-			(getCamScale().x - target_cam_scale) 
-			/ 2 ** (CAM_ZOOM_SPEED*dt()) 
-			+ target_cam_scale
+			(getCamScale().x - targetCamScale) 
+			/ 2 ** (CAMERA.ZOOM.SPEED * dt()) 
+			+ targetCamScale
 		)
 	);
+
+	// Camera offset effect
+
+	let targetCamOffset = mousePos().sub(center()).scale(CAMERA.ZOOM.MAGNITUDE);
+	let nextCamOffset = (
+		CAMERA.SHIFT.CURRENT_SHIFT.sub(
+			targetCamOffset
+		).scale(
+			1 / 2 ** (CAMERA.SHIFT.SPEED * dt())
+		).add(
+			targetCamOffset
+		)
+	);
+	CAMERA.SHIFT.CURRENT_SHIFT = nextCamOffset;
+	setCamPos(player.pos.add(nextCamOffset));
 
 })

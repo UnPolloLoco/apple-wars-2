@@ -12,12 +12,24 @@ kaboom({
 
 var UNIT = width() / 20;
 
-const PLAYER_SPEED = 6;
-const CAM_ZOOM_SPEED = 4;
-const CAM_ZOOM_MAGNITUDE = 0.07;
-
-const ARENA_DIMENSIONS = [10,6];
-const ARENA_TILE_SIZE = 5;
+const PLAYER = {
+	SPEED: 6,
+};
+const CAMERA = {
+	ZOOM: {
+		SPEED: 4,
+		MAGNITUDE: 0.07,
+	},
+	SHIFT: {
+		SPEED: 15,
+		MAGNITUDE: 0.05,
+		CURRENT_SHIFT: vec2(0),
+	}
+}
+const ARENA = {
+	DIMENSIONS: [10,6],
+	TILE_SIZE: 5,
+}
 
 loadBean();
 
