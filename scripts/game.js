@@ -1,27 +1,42 @@
 setCamPos(0, 0);
 
-const player = add([
-	sprite('bean'),
-	pos(0,0),
-	scale(UNIT/61),
-	anchor('center'),
-	rotate(0),
-	z(1),
-])
+// Arena set-up
 
 let arenaWidth = ARENA.DIMENSIONS[0];
 let arenaHeight = ARENA.DIMENSIONS[1];
 
 for (let x = 0; x < arenaWidth; x++) {
 	for (let y = 0; y < arenaHeight; y++) {
+		let frameNum = 4;
+
+		// Choose correct grass frame
+		let isTop =   y == 0;
+		let isBot =   y == arenaHeight - 1;
+		let isLeft =  x == 0;
+		let isRight = x == arenaWidth - 1;
+
+		if (isTop) {
+			if (isLeft) 		{ frameNum = 0 }
+			else if (isRight)	{ frameNum = 2 }
+			else				{ frameNum = 1 }
+		} else if (isBot) {
+			if (isLeft) 		{ frameNum = 6 }
+			else if (isRight)	{ frameNum = 8 }
+			else				{ frameNum = 7 }
+		} else {
+			if (isLeft) 		{ frameNum = 3 }
+			else if (isRight)	{ frameNum = 5 }
+			else				{ frameNum = 4 }
+		}
+
 		add([
-			sprite('grass'),
+			sprite('grass', { frame: frameNum }),
 			color(GREEN),
 			pos(
 				UNIT*ARENA.TILE_SIZE * (x - arenaWidth/2 + 0.5),
 				UNIT*ARENA.TILE_SIZE * (y - arenaHeight/2 + 0.5),
 			),
-			scale(UNIT/800 * ARENA.TILE_SIZE),
+			scale(UNIT/400 * ARENA.TILE_SIZE),
 			offscreen({ 
 				hide: true,
 				distance: UNIT*ARENA.TILE_SIZE,
@@ -31,9 +46,22 @@ for (let x = 0; x < arenaWidth; x++) {
 	}
 }
 
+// Player
+
+const player = add([
+	sprite('bean'),
+	pos(0,0),
+	scale(UNIT/61),
+	anchor('center'),
+	rotate(0),
+	z(1),
+])
 
 
 
+
+
+// Buttons
 
 onButtonPress('shoot', () => {
 	add([
@@ -41,7 +69,7 @@ onButtonPress('shoot', () => {
 		pos(player.pos),
 		scale(UNIT/27 * 0.3),
 		rotate(player.angle),
-		move(player.angle + 90, UNIT*10),
+		move(player.angle + 90, UNIT*15),
 		opacity(1),
 		lifespan(3),
 	])

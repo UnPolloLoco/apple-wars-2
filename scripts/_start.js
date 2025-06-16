@@ -33,5 +33,11 @@ const ARENA = {
 
 loadBean();
 
-loadSprite('grass', 'https://iili.io/FBe1hV1.png');
 loadSprite('bullet', 'https://iili.io/FqEvP2e.png');
+
+loadRoot("https://unpolloloco.github.io/apple-wars-2/assets/");
+
+loadSprite('grass', 'sprites/grass.png', {
+	sliceX: 3,
+	sliceY: 3,
+});
