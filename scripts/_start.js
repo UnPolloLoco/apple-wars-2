@@ -5,15 +5,17 @@ kaboom({
 	letterbox: true,
 	pixelDensity: 1,
 	logMax: 3,
+	debugKey: 'i',
 	buttons: {
         shoot: { keyboard: ["space"] },
+        pause: { keyboard: ["p"] },
     },
 });
 
 var UNIT = width() / 20;
 
 const PLAYER = {
-	SPEED: 6,
+	SPEED: 4,
 };
 const CAMERA = {
 	ZOOM: {
@@ -23,7 +25,6 @@ const CAMERA = {
 	SHIFT: {
 		SPEED: 15,
 		MAGNITUDE: 0.05,
-		CURRENT_SHIFT: vec2(0),
 	}
 }
 const ARENA = {

@@ -1,4 +1,25 @@
+const LAYERS = {
+	ground:  100,
+	players: 200,
+	ui:      300,
+}
+
 setCamPos(0, 0);
+
+const GAME_STATUS = {
+	CAMERA: {
+		CURRENT_SHIFT: vec2(0),
+	},
+	ENEMIES: {
+		SUMMON_QUEUE: 0,
+	}
+}
+
+const gameScene = add([ timer() ]);
+
+
+
+
 
 // Arena set-up
 
@@ -9,7 +30,6 @@ for (let x = 0; x < arenaWidth; x++) {
 	for (let y = 0; y < arenaHeight; y++) {
 		let frameNum = 4;
 
-		// Choose correct grass frame
 		let isTop =   y == 0;
 		let isBot =   y == arenaHeight - 1;
 		let isLeft =  x == 0;
@@ -29,7 +49,7 @@ for (let x = 0; x < arenaWidth; x++) {
 			else				{ frameNum = 4 }
 		}
 
-		add([
+		gameScene.add([
 			sprite('grass', { frame: frameNum }),
 			color(GREEN),
 			pos(
@@ -42,20 +62,78 @@ for (let x = 0; x < arenaWidth; x++) {
 				distance: UNIT*ARENA.TILE_SIZE,
 			}),
 			anchor('center'),
+			z(LAYERS.ground)
 		])
 	}
 }
 
 // Player
 
-const player = add([
+const player = gameScene.add([
 	sprite('bean'),
 	pos(0,0),
-	scale(UNIT/61),
+	scale(UNIT/61 * 0.75),
 	anchor('center'),
 	rotate(0),
-	z(1),
+	z(LAYERS.players + 1),
+	"character",
+	{
+		isEnemy: false,
+	}
 ])
+
+// Enemy queue and summoning
+
+function increaseQueue() {
+	GAME_STATUS.ENEMIES.SUMMON_QUEUE++;
+	gameScene.wait(2, increaseQueue);
+}
+increaseQueue();
+
+function summonEnemy() {
+	gameScene.add([
+		sprite('bean'),
+		pos(player.pos.add(
+			Vec2.fromAngle(rand(360)).scale(UNIT * 18)
+		)),
+		scale(UNIT/61 * 0.75),
+		anchor('center'),
+		rotate(0),
+		color(RED),
+		offscreen({ 
+			hide: true,
+			distance: UNIT*2,
+		}),
+		area(),
+		z(LAYERS.players),
+		"character",
+		{
+			isEnemy: true,
+		}
+	])
+}
+
+// Attacking
+
+function attack(source) {
+	let bullet =gameScene.add([
+		sprite('bullet'),
+		pos(source.pos),
+		scale(UNIT/27 * 0.3),
+		rotate(source.angle),
+		move(source.angle + 90, UNIT*15),
+		anchor('center'),
+		z(LAYERS.players - 1),
+		area(),
+		timer(),
+		"bullet",
+		{
+			isEnemy: source.isEnemy,
+		}
+	])
+
+	bullet.wait(2.5, () => { destroy(bullet); });
+}
 
 
 
@@ -64,15 +142,11 @@ const player = add([
 // Buttons
 
 onButtonPress('shoot', () => {
-	add([
-		sprite('bullet'),
-		pos(player.pos),
-		scale(UNIT/27 * 0.3),
-		rotate(player.angle),
-		move(player.angle + 90, UNIT*15),
-		opacity(1),
-		lifespan(3),
-	])
+	attack(player);
+})
+
+onButtonPress('pause', () => {
+	gameScene.paused = !gameScene.paused;
 })
 
 // Movement
@@ -88,11 +162,31 @@ onMouseDown(() => {
 	);
 })
 
+// Collisions
+
+onCollide('character', 'bullet', (c, b) => {
+	if (c.isEnemy != b.isEnemy) {
+		destroy(c);
+		destroy(b);
+	}
+})
+
 
 
 
 
 onUpdate(() => {
+
+	// Summon enemies
+
+	while (GAME_STATUS.ENEMIES.SUMMON_QUEUE > 0) {
+		summonEnemy();
+		GAME_STATUS.ENEMIES.SUMMON_QUEUE--;
+	}
+
+	// Move enemies
+
+
 
 	// Camera zoom effect
 
@@ -105,11 +199,13 @@ onUpdate(() => {
 		)
 	);
 
+	if (isKeyDown('z')) setCamScale(0.4);
+
 	// Camera offset effect
 
 	let targetCamOffset = mousePos().sub(center()).scale(CAMERA.ZOOM.MAGNITUDE);
 	let nextCamOffset = (
-		CAMERA.SHIFT.CURRENT_SHIFT.sub(
+		GAME_STATUS.CAMERA.CURRENT_SHIFT.sub(
 			targetCamOffset
 		).scale(
 			1 / 2 ** (CAMERA.SHIFT.SPEED * dt())
@@ -117,7 +213,13 @@ onUpdate(() => {
 			targetCamOffset
 		)
 	);
-	CAMERA.SHIFT.CURRENT_SHIFT = nextCamOffset;
+	GAME_STATUS.CAMERA.CURRENT_SHIFT = nextCamOffset;
 	setCamPos(player.pos.add(nextCamOffset));
+
+	// Debug info
+
+	if (debug.inspect) {
+		debug.log(`objs: ${debug.numObjects()}  ––  draw: ${debug.drawCalls()}`)
+	}
 
 })
