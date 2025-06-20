@@ -12,6 +12,10 @@ const GAME_STATUS = {
 	},
 	ENEMIES: {
 		SUMMON_QUEUE: 0,
+	},
+	DEBUG: {
+		CHAR_OFFSCREEN: 0,
+		CHAR_ONSCREEN: 0,
 	}
 }
 
@@ -51,7 +55,7 @@ for (let x = 0; x < arenaWidth; x++) {
 
 		gameScene.add([
 			sprite('grass', { frame: frameNum }),
-			color(GREEN),
+			color(WHITE),
 			pos(
 				UNIT*ARENA_TILE_SIZE * (x - arenaWidth/2 + 0.5),
 				UNIT*ARENA_TILE_SIZE * (y - arenaHeight/2 + 0.5),
@@ -62,7 +66,8 @@ for (let x = 0; x < arenaWidth; x++) {
 				distance: UNIT * ARENA_TILE_SIZE,
 			}),
 			anchor('center'),
-			z(LAYERS.ground)
+			z(LAYERS.ground),
+			"grass"
 		])
 	}
 }
@@ -77,11 +82,8 @@ const player = gameScene.add([
 	rotate(0),
 	z(LAYERS.players + 1),
 	offscreen({ distance: UNIT * OFFSCREEN_DISTANCE }),
-	area(),
 	"character",
-	{
-		isEnemy: false,
-	}
+	"ally",
 ])
 
 // Enemy queue and summoning
@@ -103,19 +105,16 @@ function summonEnemy() {
 		rotate(0),
 		color(RED),
 		offscreen({ distance: UNIT * OFFSCREEN_DISTANCE }),
-		area(),
 		z(LAYERS.players),
 		"character",
-		{
-			isEnemy: true,
-		}
+		"enemy",
 	])
 }
 
 // Attacking
 
 function attack(source) {
-	let bullet =gameScene.add([
+	let bullet = gameScene.add([
 		sprite('bullet'),
 		pos(source.pos),
 		scale(UNIT/27 * 0.3),
@@ -123,15 +122,23 @@ function attack(source) {
 		move(source.angle + 90, UNIT*15),
 		anchor('center'),
 		z(LAYERS.players - 1),
-		area(),
 		timer(),
 		"bullet",
-		{
-			isEnemy: source.isEnemy,
-		}
 	])
 
+	if (source.is('enemy')) {
+		bullet.tag('enemy');
+	} else {
+		bullet.tag('ally');
+	}
+
 	bullet.wait(2.5, () => { destroy(bullet); });
+}
+
+// Death 
+
+function death(victim) {
+	destroy(victim);
 }
 
 
@@ -163,21 +170,21 @@ onMouseDown(() => {
 
 // Collisions
 
-onCollide('character', 'bullet', (c, b) => {
-	if (c.isEnemy != b.isEnemy) {
-		destroy(c);
+function bulletCollision(b, c) {
+	if (c.is('enemy') != b.is('enemy')) {
+		death(c);
 		destroy(b);
 	}
-})
+}
 
 
-// Check for offscreen (less often than every frame)
+// Check for offscreen 
 
 gameScene.loop(0.2, () => {
 	let off = 0;
 	let on = 0;
 	gameScene.get('character').forEach((c) => {
-		if (c.isOffScreen()) {
+		if (c.is('enemy') && c.isOffScreen()) {
 			c.hidden = true;
 			c.paused = true;
 			off++;
@@ -186,9 +193,15 @@ gameScene.loop(0.2, () => {
 			c.paused = false;
 			on++;
 		}
+
 	})
-	//debug.log(`${on} / ${on + off}`)
+	GAME_STATUS.DEBUG.CHAR_ONSCREEN = on;
+	GAME_STATUS.DEBUG.CHAR_OFFSCREEN = off;
 })
+
+
+
+
 
 onUpdate(() => {
 
@@ -199,9 +212,39 @@ onUpdate(() => {
 		GAME_STATUS.ENEMIES.SUMMON_QUEUE--;
 	}
 
-	// Move enemies
+	// Enemy movement
 
+	gameScene.get('enemy').forEach((c) => {
+		let angle = player.pos.angle(c.pos) - 90;
+		c.angle = angle;
 
+		if (c.pos.sdist(player.pos) > (UNIT*5)**2) {
+			c.pos = c.pos.add(
+				Vec2.fromAngle(angle + 90)
+				.scale(UNIT * ENEMY_SPEED * dt())
+			);
+		}
+	})
+
+	// Bullet collision
+
+	gameScene.get('bullet').forEach((b) => {
+		let victims;
+		
+		victims = gameScene.get(
+			b.is('enemy') ? 'ally' : 'enemy'
+		);
+
+		for (let i = 0; i < victims.length; i++) {
+			let v = victims[i];
+
+			let radius = UNIT * 0.4;
+			if (b.pos.sdist(v.pos) < radius * radius) {
+				bulletCollision(b, v);
+				break;
+			}
+		}
+	})
 
 	// Camera zoom effect
 
@@ -213,9 +256,7 @@ onUpdate(() => {
 			+ targetCamScale
 		)
 	);
-
-	if (isKeyDown('z')) setCamScale(0.4);
-
+	
 	// Camera offset effect
 
 	let targetCamOffset = mousePos().sub(center()).scale(CAMERA_ZOOM_MAGNITUDE);
@@ -234,7 +275,17 @@ onUpdate(() => {
 	// Debug info
 
 	if (debug.inspect) {
-		debug.log(`objs: ${debug.numObjects()}  ––  draw: ${debug.drawCalls()}`)
+		let on = GAME_STATUS.DEBUG.CHAR_ONSCREEN;
+		let onOffTotal = GAME_STATUS.DEBUG.CHAR_ONSCREEN + GAME_STATUS.DEBUG.CHAR_OFFSCREEN;
+
+		debug.clearLog();
+		debug.log(`
+			objs:  ${debug.numObjects()} (${on}/${onOffTotal})
+			draw:  ${debug.drawCalls()}
+		`);
 	}
+
+	if (isKeyDown('z')) setCamScale(0.4);
+	if (isKeyDown('x')) { summonEnemy(); summonEnemy(); summonEnemy(); };
 
 })
