@@ -136,6 +136,7 @@ function attack(source) {
 		}
 	])
 
+	source.nextShootTime = time() + 0.5;
 	bullet.wait(2.5, () => { destroy(bullet); });
 }
 
@@ -156,7 +157,7 @@ function death(victim) {
 // Buttons
 
 onButtonPress('shoot', () => {
-	attack(player);
+	if (time() > player.nextShootTime) attack(player);
 })
 
 onButtonPress('pause', () => {
@@ -238,7 +239,6 @@ onUpdate(() => {
 
 			if (time() > c.nextShootTime && distanceToPlayer < (UNIT * 5)**2) {
 				attack(c);
-				c.nextShootTime = time() + 1;
 			}
 		}
 
@@ -306,4 +306,27 @@ onUpdate(() => {
 	if (isKeyDown('z')) setCamScale(0.4);
 	if (isKeyDown('x')) { summonEnemy(); summonEnemy(); summonEnemy(); };
 
+})
+
+onDraw(() => {
+	if (time() < player.nextShootTime) {
+		drawRect({
+			width: UNIT * 0.6, height: UNIT * 0.08,
+			color: BLACK, opacity: 0.1,
+			pos: player.pos.add(
+				UNIT * -0.3,
+				UNIT * 0.5
+			),
+		})
+	
+		drawRect({
+			width: UNIT * 0.6 * (1 - ((player.nextShootTime - time()) / 0.5)),
+			height: UNIT * 0.08,
+			color: WHITE, opacity: 0.4,
+			pos: player.pos.add(
+				UNIT * -0.3,
+				UNIT * 0.5
+			),
+		})
+	}
 })
