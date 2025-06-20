@@ -234,14 +234,13 @@ onUpdate(() => {
 				Vec2.fromAngle(angle + 90)
 				.scale(UNIT * ENEMY_SPEED * dt())
 			);
-
-			// Enemy attack
-
-			if (time() > c.nextShootTime && distanceToPlayer < (UNIT * 5)**2) {
-				attack(c);
-			}
 		}
+		
+		// Enemy attack
 
+		if (time() > c.nextShootTime && distanceToPlayer < (UNIT * 5)**2) {
+			attack(c);
+		}
 	})
 
 	// Bullet collision
