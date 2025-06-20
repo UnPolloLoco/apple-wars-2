@@ -23,8 +23,8 @@ const gameScene = add([ timer() ]);
 
 // Arena set-up
 
-let arenaWidth = ARENA.DIMENSIONS[0];
-let arenaHeight = ARENA.DIMENSIONS[1];
+let arenaWidth = ARENA_DIMENSIONS[0];
+let arenaHeight = ARENA_DIMENSIONS[1];
 
 for (let x = 0; x < arenaWidth; x++) {
 	for (let y = 0; y < arenaHeight; y++) {
@@ -53,13 +53,13 @@ for (let x = 0; x < arenaWidth; x++) {
 			sprite('grass', { frame: frameNum }),
 			color(GREEN),
 			pos(
-				UNIT*ARENA.TILE_SIZE * (x - arenaWidth/2 + 0.5),
-				UNIT*ARENA.TILE_SIZE * (y - arenaHeight/2 + 0.5),
+				UNIT*ARENA_TILE_SIZE * (x - arenaWidth/2 + 0.5),
+				UNIT*ARENA_TILE_SIZE * (y - arenaHeight/2 + 0.5),
 			),
-			scale(UNIT/400 * ARENA.TILE_SIZE),
+			scale(UNIT/400 * ARENA_TILE_SIZE),
 			offscreen({ 
 				hide: true,
-				distance: UNIT * OFFSCREEN_DISTANCE,
+				distance: UNIT * ARENA_TILE_SIZE,
 			}),
 			anchor('center'),
 			z(LAYERS.ground)
@@ -102,7 +102,7 @@ function summonEnemy() {
 		anchor('center'),
 		rotate(0),
 		color(RED),
-		offscreen({ distance: UNIT*2 }),
+		offscreen({ distance: UNIT * OFFSCREEN_DISTANCE }),
 		area(),
 		z(LAYERS.players),
 		"character",
@@ -157,7 +157,7 @@ onMouseMove(() => {
 onMouseDown(() => {
 	player.pos = player.pos.add(
 		Vec2.fromAngle(player.angle + 90)
-		.scale(UNIT * dt() * PLAYER.SPEED)
+		.scale(UNIT * dt() * PLAYER_SPEED)
 	);
 })
 
@@ -187,7 +187,7 @@ gameScene.loop(0.2, () => {
 			on++;
 		}
 	})
-	debug.log(`${on} / ${on + off}`)
+	//debug.log(`${on} / ${on + off}`)
 })
 
 onUpdate(() => {
@@ -205,11 +205,11 @@ onUpdate(() => {
 
 	// Camera zoom effect
 
-	let targetCamScale = 1 - isMouseDown() * CAMERA.ZOOM.MAGNITUDE;
+	let targetCamScale = 1 - isMouseDown() * CAMERA_ZOOM_MAGNITUDE;
 	setCamScale(
 		vec2(
 			(getCamScale().x - targetCamScale) 
-			/ 2 ** (CAMERA.ZOOM.SPEED * dt()) 
+			/ 2 ** (CAMERA_ZOOM_SPEED * dt()) 
 			+ targetCamScale
 		)
 	);
@@ -218,17 +218,17 @@ onUpdate(() => {
 
 	// Camera offset effect
 
-	let targetCamOffset = mousePos().sub(center()).scale(CAMERA.ZOOM.MAGNITUDE);
+	let targetCamOffset = mousePos().sub(center()).scale(CAMERA_ZOOM_MAGNITUDE);
 	let nextCamOffset = (
 		GAME_STATUS.CAMERA.CURRENT_SHIFT.sub(
 			targetCamOffset
 		).scale(
-			1 / 2 ** (CAMERA.SHIFT.SPEED * dt())
+			1 / 2 ** (CAMERA_SHIFT_SPEED * dt())
 		).add(
 			targetCamOffset
 		)
 	);
-	GAME_STATUS.CAMERA.CURRENT_SHIFT = nextCamOffset;
+	GAME_STATUS.CAMERA_CURRENT_SHIFT = nextCamOffset;
 	setCamPos(player.pos.add(nextCamOffset));
 
 	// Debug info

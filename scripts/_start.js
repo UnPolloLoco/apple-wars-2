@@ -15,30 +15,23 @@ kaboom({
 
 var UNIT = width() / 20;
 
-const PLAYER = {
-	SPEED: 4,
-};
-const CAMERA = {
-	ZOOM: {
-		SPEED: 4,
-		MAGNITUDE: 0.07,
-	},
-	SHIFT: {
-		SPEED: 15,
-		MAGNITUDE: 0.05,
-	}
-}
-const ARENA = {
-	DIMENSIONS: [10,6],
-	TILE_SIZE: 5,
-}
+const PLAYER_SPEED = 4;
+
+const CAMERA_ZOOM_SPEED = 4;
+const CAMERA_ZOOM_MAGNITUDE = 0.07;
+const CAMERA_SHIFT_SPEED = 15;
+const CAMERA_SHIFT_MAGNITUDE = 0.05;
+
+const ARENA_DIMENSIONS = [10,6];
+const ARENA_TILE_SIZE = 5;
+
 const OFFSCREEN_DISTANCE = 2;
 
 loadBean();
 
 loadSprite('bullet', 'https://iili.io/FqEvP2e.png');
 
-loadRoot("https://unpolloloco.github.io/apple-wars-2/assets/");
+loadRoot('https://unpolloloco.github.io/apple-wars-2/assets/');
 
 loadSprite('grass', 'sprites/grass.png', {
 	sliceX: 3,
