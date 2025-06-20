@@ -59,7 +59,7 @@ for (let x = 0; x < arenaWidth; x++) {
 			scale(UNIT/400 * ARENA.TILE_SIZE),
 			offscreen({ 
 				hide: true,
-				distance: UNIT*ARENA.TILE_SIZE,
+				distance: UNIT * OFFSCREEN_DISTANCE,
 			}),
 			anchor('center'),
 			z(LAYERS.ground)
@@ -76,6 +76,8 @@ const player = gameScene.add([
 	anchor('center'),
 	rotate(0),
 	z(LAYERS.players + 1),
+	offscreen({ distance: UNIT * OFFSCREEN_DISTANCE }),
+	area(),
 	"character",
 	{
 		isEnemy: false,
@@ -100,10 +102,7 @@ function summonEnemy() {
 		anchor('center'),
 		rotate(0),
 		color(RED),
-		offscreen({ 
-			hide: true,
-			distance: UNIT*2,
-		}),
+		offscreen({ distance: UNIT*2 }),
 		area(),
 		z(LAYERS.players),
 		"character",
@@ -172,8 +171,24 @@ onCollide('character', 'bullet', (c, b) => {
 })
 
 
+// Check for offscreen (less often than every frame)
 
-
+gameScene.loop(0.2, () => {
+	let off = 0;
+	let on = 0;
+	gameScene.get('character').forEach((c) => {
+		if (c.isOffScreen()) {
+			c.hidden = true;
+			c.paused = true;
+			off++;
+		} else {
+			c.hidden = false;
+			c.paused = false;
+			on++;
+		}
+	})
+	debug.log(`${on} / ${on + off}`)
+})
 
 onUpdate(() => {
 

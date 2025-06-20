@@ -4,6 +4,7 @@ kaboom({
 	height: window.innerWidth * 0.6,
 	letterbox: true,
 	pixelDensity: 1,
+	crisp: true,
 	logMax: 3,
 	debugKey: 'i',
 	buttons: {
@@ -31,6 +32,7 @@ const ARENA = {
 	DIMENSIONS: [10,6],
 	TILE_SIZE: 5,
 }
+const OFFSCREEN_DISTANCE = 2;
 
 loadBean();
 
