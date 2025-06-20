@@ -84,6 +84,9 @@ const player = gameScene.add([
 	offscreen({ distance: UNIT * OFFSCREEN_DISTANCE }),
 	"character",
 	"ally",
+	{
+		nextShootTime: 0,
+	}
 ])
 
 // Enemy queue and summoning
@@ -108,6 +111,10 @@ function summonEnemy() {
 		z(LAYERS.players),
 		"character",
 		"enemy",
+		{
+			approachDistance: rand(4,5),
+			nextShootTime: 0,
+		}
 	])
 }
 
@@ -119,18 +126,15 @@ function attack(source) {
 		pos(source.pos),
 		scale(UNIT/27 * 0.3),
 		rotate(source.angle),
-		move(source.angle + 90, UNIT*15),
+		move(source.angle + 90, UNIT*10),
 		anchor('center'),
 		z(LAYERS.players - 1),
 		timer(),
 		"bullet",
+		{
+			isFromEnemy: source.is('enemy'), 
+		}
 	])
-
-	if (source.is('enemy')) {
-		bullet.tag('enemy');
-	} else {
-		bullet.tag('ally');
-	}
 
 	bullet.wait(2.5, () => { destroy(bullet); });
 }
@@ -138,7 +142,11 @@ function attack(source) {
 // Death 
 
 function death(victim) {
-	destroy(victim);
+	if (victim == player) {
+		debug.log('DEAD!')
+	} else {
+		destroy(victim);
+	}
 }
 
 
@@ -171,7 +179,7 @@ onMouseDown(() => {
 // Collisions
 
 function bulletCollision(b, c) {
-	if (c.is('enemy') != b.is('enemy')) {
+	if (c.is('enemy') != b.isFromEnemy) {
 		death(c);
 		destroy(b);
 	}
@@ -218,12 +226,22 @@ onUpdate(() => {
 		let angle = player.pos.angle(c.pos) - 90;
 		c.angle = angle;
 
-		if (c.pos.sdist(player.pos) > (UNIT*5)**2) {
+		let distanceToPlayer = c.pos.sdist(player.pos);
+
+		if (distanceToPlayer > (UNIT * c.approachDistance)**2) {
 			c.pos = c.pos.add(
 				Vec2.fromAngle(angle + 90)
 				.scale(UNIT * ENEMY_SPEED * dt())
 			);
+
+			// Enemy attack
+
+			if (time() > c.nextShootTime && distanceToPlayer < (UNIT * 5)**2) {
+				attack(c);
+				c.nextShootTime = time() + 1;
+			}
 		}
+
 	})
 
 	// Bullet collision
@@ -232,7 +250,7 @@ onUpdate(() => {
 		let victims;
 		
 		victims = gameScene.get(
-			b.is('enemy') ? 'ally' : 'enemy'
+			b.isFromEnemy ? 'ally' : 'enemy'
 		);
 
 		for (let i = 0; i < victims.length; i++) {
