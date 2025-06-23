@@ -15,7 +15,7 @@ kaboom({
 
 var UNIT = width() / 20;
 
-const PLAYER_SPEED = 5;
+const PLAYER_SPEED = 4;
 
 const ENEMY_SPEED = 2;
 
@@ -24,9 +24,9 @@ const OFFSCREEN_DISTANCE = 2;
 const CAMERA_ZOOM_SPEED = 4;
 const CAMERA_ZOOM_MAGNITUDE = 0.07;
 const CAMERA_SHIFT_SPEED = 15;
-const CAMERA_SHIFT_MAGNITUDE = 0.05;
+const CAMERA_SHIFT_MAGNITUDE = 0.2;
 
-const ARENA_DIMENSIONS = [10,6];
+const ARENA_DIMENSIONS = [8,6];
 const ARENA_TILE_SIZE = 5;
 
 

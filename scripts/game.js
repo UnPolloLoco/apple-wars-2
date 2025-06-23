@@ -30,6 +30,18 @@ const gameScene = add([ timer() ]);
 let arenaWidth = ARENA_DIMENSIONS[0];
 let arenaHeight = ARENA_DIMENSIONS[1];
 
+// Backing rectangle
+
+gameScene.add([
+	pos(center()),
+	rect(width(), height()),
+	color(rgb(35, 105, 25)),
+	scale(1.23),
+	anchor('center'),
+	fixed(),
+	z(LAYERS.ground - 1),
+])
+
 for (let x = 0; x < arenaWidth; x++) {
 	for (let y = 0; y < arenaHeight; y++) {
 		let frameNum = 4;
@@ -55,7 +67,6 @@ for (let x = 0; x < arenaWidth; x++) {
 
 		gameScene.add([
 			sprite('grass', { frame: frameNum }),
-			color(WHITE),
 			pos(
 				UNIT*ARENA_TILE_SIZE * (x - arenaWidth/2 + 0.5),
 				UNIT*ARENA_TILE_SIZE * (y - arenaHeight/2 + 0.5),
@@ -77,11 +88,12 @@ for (let x = 0; x < arenaWidth; x++) {
 const player = gameScene.add([
 	sprite('bean'),
 	pos(0,0),
-	scale(UNIT/61 * 0.75),
+	scale(UNIT/61 * 0.85),
 	anchor('center'),
 	rotate(0),
 	z(LAYERS.players + 1),
 	offscreen({ distance: UNIT * OFFSCREEN_DISTANCE }),
+	color(RED),
 	"character",
 	"ally",
 	{
@@ -103,10 +115,9 @@ function summonEnemy() {
 		pos(player.pos.add(
 			Vec2.fromAngle(rand(360)).scale(UNIT * 18)
 		)),
-		scale(UNIT/61 * 0.75),
+		scale(UNIT/61 * 0.85),
 		anchor('center'),
 		rotate(0),
-		color(RED),
 		offscreen({ distance: UNIT * OFFSCREEN_DISTANCE }),
 		z(LAYERS.players),
 		"character",
@@ -136,7 +147,12 @@ function attack(source) {
 		}
 	])
 
-	source.nextShootTime = time() + 0.5;
+	if (source.is('enemy')) {
+		source.nextShootTime = time() + 0.8;
+	} else {
+		source.nextShootTime = time() + 0.1;
+	}
+
 	bullet.wait(2.5, () => { destroy(bullet); });
 }
 
@@ -192,6 +208,7 @@ function bulletCollision(b, c) {
 gameScene.loop(0.2, () => {
 	let off = 0;
 	let on = 0;
+
 	gameScene.get('character').forEach((c) => {
 		if (c.is('enemy') && c.isOffScreen()) {
 			c.hidden = true;
@@ -202,8 +219,8 @@ gameScene.loop(0.2, () => {
 			c.paused = false;
 			on++;
 		}
-
 	})
+
 	GAME_STATUS.DEBUG.CHAR_ONSCREEN = on;
 	GAME_STATUS.DEBUG.CHAR_OFFSCREEN = off;
 })
@@ -276,7 +293,7 @@ onUpdate(() => {
 	
 	// Camera offset effect
 
-	let targetCamOffset = mousePos().sub(center()).scale(CAMERA_ZOOM_MAGNITUDE);
+	let targetCamOffset = mousePos().sub(center()).scale(CAMERA_SHIFT_MAGNITUDE);
 	let nextCamOffset = (
 		GAME_STATUS.CAMERA.CURRENT_SHIFT.sub(
 			targetCamOffset
@@ -305,27 +322,4 @@ onUpdate(() => {
 	if (isKeyDown('z')) setCamScale(0.4);
 	if (isKeyDown('x')) { summonEnemy(); summonEnemy(); summonEnemy(); };
 
-})
-
-onDraw(() => {
-	if (time() < player.nextShootTime) {
-		drawRect({
-			width: UNIT * 0.6, height: UNIT * 0.08,
-			color: BLACK, opacity: 0.1,
-			pos: player.pos.add(
-				UNIT * -0.3,
-				UNIT * 0.5
-			),
-		})
-	
-		drawRect({
-			width: UNIT * 0.6 * (1 - ((player.nextShootTime - time()) / 0.5)),
-			height: UNIT * 0.08,
-			color: WHITE, opacity: 0.4,
-			pos: player.pos.add(
-				UNIT * -0.3,
-				UNIT * 0.5
-			),
-		})
-	}
 })
