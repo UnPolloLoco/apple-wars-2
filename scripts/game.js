@@ -124,33 +124,41 @@ function summonEnemy() {
 		"enemy",
 		{
 			approachDistance: rand(4,5),
-			nextShootTime: 0,
+			nextShootTime:    0,
+			health:           20,
 		}
 	])
 }
 
 // Attacking
 
-function attack(source) {
+function attack(data) {
+	// data = {source, type}
+
+	let bInfo = BULLETS[data.type];
+	let s = data.source;
+
 	let bullet = gameScene.add([
 		sprite('bullet'),
-		pos(source.pos),
-		scale(UNIT/27 * 0.3),
-		rotate(source.angle),
-		move(source.angle + 90, UNIT*10),
+		pos(s.pos),
+		scale(UNIT / bInfo.size * bInfo.scale),
+		rotate(s.angle),
+		move(s.angle + 90, UNIT*bInfo.speed),
 		anchor('center'),
 		z(LAYERS.players - 1),
 		timer(),
 		"bullet",
 		{
-			isFromEnemy: source.is('enemy'), 
+			source:      s,
+			info:        bInfo,
+			isFromEnemy: s.is('enemy'),
 		}
 	])
 
-	if (source.is('enemy')) {
-		source.nextShootTime = time() + 0.8;
+	if (s.is('enemy')) {
+		s.nextShootTime = time() + 0.8;
 	} else {
-		source.nextShootTime = time() + 0.1;
+		s.nextShootTime = time() + 0.1;
 	}
 
 	bullet.wait(2.5, () => { destroy(bullet); });
@@ -166,6 +174,23 @@ function death(victim) {
 	}
 }
 
+// Bullet collide function
+
+function bulletCollision(b, c) {
+	if (c.is('enemy') != b.isFromEnemy) {
+		// Victim bounces back
+		c.pos = c.pos.add(
+			Vec2.fromAngle(b.angle + 90).scale(UNIT / 8)
+		);
+
+		// Damage victim
+		c.health -= b.info.damage;
+		if (c.health <= 0) death(c);
+		
+		// 'Damage' bullet
+		destroy(b);
+	}
+}
 
 
 
@@ -173,7 +198,10 @@ function death(victim) {
 // Buttons
 
 onButtonPress('shoot', () => {
-	if (time() > player.nextShootTime) attack(player);
+	if (time() > player.nextShootTime) attack({
+		source: player,
+		type:   'appleSeed',
+	});
 })
 
 onButtonPress('pause', () => {
@@ -193,14 +221,6 @@ onMouseDown(() => {
 	);
 })
 
-// Collisions
-
-function bulletCollision(b, c) {
-	if (c.is('enemy') != b.isFromEnemy) {
-		death(c);
-		destroy(b);
-	}
-}
 
 
 // Check for offscreen 
@@ -256,7 +276,10 @@ onUpdate(() => {
 		// Enemy attack
 
 		if (time() > c.nextShootTime && distanceToPlayer < (UNIT * 5)**2) {
-			attack(c);
+			attack({
+				source: c,
+				type:   'appleSeed',
+			});
 		}
 	})
 
@@ -272,7 +295,9 @@ onUpdate(() => {
 		for (let i = 0; i < victims.length; i++) {
 			let v = victims[i];
 
-			let radius = UNIT * 0.4;
+			let radius = b.info.scale/2 + 0.4;
+			radius *= UNIT;
+
 			if (b.pos.sdist(v.pos) < radius * radius) {
 				bulletCollision(b, v);
 				break;
