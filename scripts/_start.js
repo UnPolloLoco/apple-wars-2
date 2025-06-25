@@ -10,6 +10,7 @@ kaboom({
 	buttons: {
         shoot: { keyboard: ["space"] },
         pause: { keyboard: ["p"] },
+        dash:  { keyboard: ["a"] },
     },
 });
 

@@ -98,6 +98,11 @@ const player = gameScene.add([
 	"ally",
 	{
 		nextShootTime: 0,
+		health: 10,
+		dash: {
+			lastDashTime: 0,
+			isDashing: false,
+		},
 	}
 ])
 
@@ -208,17 +213,32 @@ onButtonPress('pause', () => {
 	gameScene.paused = !gameScene.paused;
 })
 
+onButtonPress('dash', () => {
+	if (time() > player.dash.lastDashTime + 3) {
+		player.dash.lastDashTime = time();
+		player.dash.isDashing = true;
+		
+		gameScene.wait(0.2, () => {
+			player.dash.isDashing = false;
+		})
+	}
+})
+
 // Movement
 
 onMouseMove(() => {
-	player.angle = toWorld(mousePos()).angle(player.pos) - 90;
+	if (!player.dash.isDashing) {
+		player.angle = toWorld(mousePos()).angle(player.pos) - 90;
+	}
 })
 
 onMouseDown(() => {
-	player.pos = player.pos.add(
-		Vec2.fromAngle(player.angle + 90)
-		.scale(UNIT * dt() * PLAYER_SPEED)
-	);
+	if (!player.dash.isDashing) {
+		player.pos = player.pos.add(
+			Vec2.fromAngle(player.angle + 90)
+			.scale(UNIT * dt() * PLAYER_SPEED)
+		);
+	}
 })
 
 
@@ -282,6 +302,16 @@ onUpdate(() => {
 			});
 		}
 	})
+
+	// Player dash movement
+
+	if (player.dash.isDashing) {
+		player.pos = player.pos.add(
+			Vec2.fromAngle(player.angle + 90)
+			.scale(UNIT * dt() * PLAYER_SPEED * 5)
+		);
+		shake(UNIT / 120);
+	}
 
 	// Bullet collision
 
