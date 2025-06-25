@@ -104,8 +104,8 @@ const player = gameScene.add([
 // Enemy queue and summoning
 
 function increaseQueue() {
-	GAME_STATUS.ENEMIES.SUMMON_QUEUE++;
-	gameScene.wait(2, increaseQueue);
+	GAME_STATUS.ENEMIES.SUMMON_QUEUE += 5;
+	gameScene.wait(10, increaseQueue);
 }
 increaseQueue();
 
@@ -280,9 +280,12 @@ onUpdate(() => {
 		}
 	})
 
-	// Camera zoom effect
+	// Camera effects
 
 	let targetCamScale = 1 - isMouseDown() * CAMERA_ZOOM_MAGNITUDE;
+	let targetCamOffset = mousePos().sub(center()).scale(CAMERA_SHIFT_MAGNITUDE);
+
+	// Zoom
 	setCamScale(
 		vec2(
 			(getCamScale().x - targetCamScale) 
@@ -290,20 +293,18 @@ onUpdate(() => {
 			+ targetCamScale
 		)
 	);
-	
-	// Camera offset effect
 
-	let targetCamOffset = mousePos().sub(center()).scale(CAMERA_SHIFT_MAGNITUDE);
+	// Offset
 	let nextCamOffset = (
 		GAME_STATUS.CAMERA.CURRENT_SHIFT.sub(
 			targetCamOffset
 		).scale(
-			1 / 2 ** (CAMERA_SHIFT_SPEED * dt())
+			2 ** -(CAMERA_SHIFT_SPEED * dt())
 		).add(
 			targetCamOffset
 		)
 	);
-	GAME_STATUS.CAMERA_CURRENT_SHIFT = nextCamOffset;
+	GAME_STATUS.CAMERA.CURRENT_SHIFT = nextCamOffset;
 	setCamPos(player.pos.add(nextCamOffset));
 
 	// Debug info
@@ -320,6 +321,6 @@ onUpdate(() => {
 	}
 
 	if (isKeyDown('z')) setCamScale(0.4);
-	if (isKeyDown('x')) { summonEnemy(); summonEnemy(); summonEnemy(); };
+	if (isKeyDown('x')) { GAME_STATUS.ENEMIES.SUMMON_QUEUE += 5; };
 
 })
