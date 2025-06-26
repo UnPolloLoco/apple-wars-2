@@ -99,6 +99,7 @@ const player = gameScene.add([
 	{
 		nextShootTime: 0,
 		health: 100,
+		movementVec: vec2(0,0),
 		dash: {
 			lastDashTime: 0,
 			isDashing: false,
@@ -208,6 +209,10 @@ function bulletCollision(b, c) {
 
 // Buttons
 
+onMousePress(() => {
+	pressButton('shoot');
+})
+
 onButtonPress('shoot', () => {
 	if (time() > player.nextShootTime) attack({
 		source: player,
@@ -220,7 +225,7 @@ onButtonPress('pause', () => {
 })
 
 onButtonPress('dash', () => {
-	if (time() > player.dash.lastDashTime + 3) {
+	if (time() > player.dash.lastDashTime + 2) {
 		player.dash.lastDashTime = time();
 		player.dash.isDashing = true;
 		
@@ -230,7 +235,7 @@ onButtonPress('dash', () => {
 	}
 })
 
-// Movement
+// Change player angle 
 
 onMouseMove(() => {
 	if (!player.dash.isDashing) {
@@ -238,14 +243,6 @@ onMouseMove(() => {
 	}
 })
 
-onMouseDown(() => {
-	if (!player.dash.isDashing) {
-		player.pos = player.pos.add(
-			Vec2.fromAngle(player.angle + 90)
-			.scale(UNIT * dt() * PLAYER_SPEED)
-		);
-	}
-})
 
 
 
@@ -280,7 +277,7 @@ onUpdate(() => {
 	// Summon enemies
 
 	let eType = 'basic';
-	if (rand() < 0.25) eType = 'swift';
+	//if (rand() < 0.25) eType = 'swift';
 	
 	summonEnemy({
 		type: eType,
@@ -313,15 +310,40 @@ onUpdate(() => {
 			});
 		}
 	})
-
-	// Player dash movement
-
+	
+	// Player movement controls
+	
+	let w = isButtonDown('up');
+	let a = isButtonDown('left');
+	let s = isButtonDown('down');
+	let d = isButtonDown('right');
+	
+	let newMovementVec = vec2(0,0);
+	
+	if (w || a || s || d) {
+		if (w) newMovementVec = newMovementVec.add(0, -1);
+		if (a) newMovementVec = newMovementVec.add(-1, 0);
+		if (s) newMovementVec = newMovementVec.add(0, 1);
+		if (d) newMovementVec = newMovementVec.add(1, 0);
+	}
+	
+	// Player movement
+	
 	if (player.dash.isDashing) {
+		// Dash
 		player.pos = player.pos.add(
-			Vec2.fromAngle(player.angle + 90)
-			.scale(UNIT * dt() * PLAYER_SPEED * 5)
+			player.movementVec.scale(
+				UNIT * dt() * DASH_SPEED
+			)
 		);
-		shake(UNIT / 120);
+	} else {
+		// No dash
+		player.movementVec = newMovementVec.unit();
+		player.pos = player.pos.add(
+			player.movementVec.scale(
+				UNIT * dt() * PLAYER_SPEED
+			)
+		);
 	}
 
 	// Bullet collision

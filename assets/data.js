@@ -8,7 +8,7 @@
 const BULLETS = {
 	appleSeed: {
 		damage: 10,
-		speed:  10,
+		speed:  15,
 		size:   27,
 		scale:  0.3,
 	}
@@ -30,11 +30,11 @@ const ENEMIES = {
 		size:   61,
 		scale:  0.85,
 	},
-	swift: {
+	/*swift: {
 		seeds:  ['appleSeed'],
 		speed:  3.75,
 		health: 10,
 		size:   61,
 		scale:  0.65,
-	}
+	}*/
 }

@@ -8,15 +8,20 @@ kaboom({
 	logMax: 3,
 	debugKey: 'i',
 	buttons: {
+		up:    { keyboard: ["w"] },
+		left:  { keyboard: ["a"] },
+		down:  { keyboard: ["s"] },
+		right: { keyboard: ["d"] },
         shoot: { keyboard: ["space"] },
         pause: { keyboard: ["p"] },
-        dash:  { keyboard: ["a"] },
+        dash:  { keyboard: ["q"] },
     },
 });
 
 var UNIT = width() / 20;
 
 const PLAYER_SPEED = 4;
+const DASH_SPEED = 20;
 
 const ENEMY_SPEED = 2;
 
