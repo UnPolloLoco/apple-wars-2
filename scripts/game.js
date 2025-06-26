@@ -98,7 +98,7 @@ const player = gameScene.add([
 	"ally",
 	{
 		nextShootTime: 0,
-		health: 10,
+		health: 100,
 		dash: {
 			lastDashTime: 0,
 			isDashing: false,
@@ -114,25 +114,31 @@ function increaseQueue() {
 }
 increaseQueue();
 
-function summonEnemy() {
-	gameScene.add([
-		sprite('bean'),
-		pos(player.pos.add(
-			Vec2.fromAngle(rand(360)).scale(UNIT * 18)
-		)),
-		scale(UNIT/61 * 0.85),
-		anchor('center'),
-		rotate(0),
-		offscreen({ distance: UNIT * OFFSCREEN_DISTANCE }),
-		z(LAYERS.players),
-		"character",
-		"enemy",
-		{
-			approachDistance: rand(4,5),
-			nextShootTime:    0,
-			health:           20,
-		}
-	])
+function summonEnemy(data) {
+	// data: {type, count}
+	let eInfo = ENEMIES[data.type];
+
+	for (let i = 0; i < data.count; i++) {
+		gameScene.add([
+			sprite('bean'),
+			pos(player.pos.add(
+				Vec2.fromAngle(rand(360)).scale(UNIT * 18)
+			)),
+			scale(UNIT / eInfo.size * eInfo.scale),
+			anchor('center'),
+			rotate(0),
+			offscreen({ distance: UNIT * OFFSCREEN_DISTANCE }),
+			z(LAYERS.players),
+			"character",
+			"enemy",
+			{
+				approachDistance: rand(3,4.5),
+				nextShootTime:    0,
+				health:           eInfo.health,
+				info:             eInfo,
+			}
+		])
+	}
 }
 
 // Attacking
@@ -273,10 +279,15 @@ onUpdate(() => {
 
 	// Summon enemies
 
-	while (GAME_STATUS.ENEMIES.SUMMON_QUEUE > 0) {
-		summonEnemy();
-		GAME_STATUS.ENEMIES.SUMMON_QUEUE--;
-	}
+	let eType = 'basic';
+	if (rand() < 0.25) eType = 'swift';
+	
+	summonEnemy({
+		type: eType,
+		count: GAME_STATUS.ENEMIES.SUMMON_QUEUE,
+	});
+	
+	GAME_STATUS.ENEMIES.SUMMON_QUEUE = 0;
 
 	// Enemy movement
 
@@ -289,7 +300,7 @@ onUpdate(() => {
 		if (distanceToPlayer > (UNIT * c.approachDistance)**2) {
 			c.pos = c.pos.add(
 				Vec2.fromAngle(angle + 90)
-				.scale(UNIT * ENEMY_SPEED * dt())
+				.scale(UNIT * c.info.speed * dt())
 			);
 		}
 		
