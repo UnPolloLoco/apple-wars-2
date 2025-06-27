@@ -7,10 +7,10 @@
 
 const BULLETS = {
 	appleSeed: {
-		damage: 10,
-		speed:  15,
-		size:   27,
-		scale:  0.3,
+		damage:	10,
+		speed:	12,
+		size:	27,
+		scale:	0.3,
 	}
 }
 
@@ -20,21 +20,16 @@ const BULLETS = {
 	health:		health
 	size:		sprite width (px)
 	scale:		in game size (UNITS)
+	aimSkill:	attack predicts player movement (0 or 1)
 */
 
 const ENEMIES = {
 	basic: {
-		seeds:  ['appleSeed'],
-		speed:  2,
-		health: 20,
-		size:   61,
-		scale:  0.85,
+		seeds:		['appleSeed'],
+		speed:		2,
+		health:		20,
+		size:		61,
+		scale:		0.85,
+		aimSkill:	0,
 	},
-	/*swift: {
-		seeds:  ['appleSeed'],
-		speed:  3.75,
-		health: 10,
-		size:   61,
-		scale:  0.65,
-	}*/
 }

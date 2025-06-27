@@ -134,7 +134,6 @@ function summonEnemy(data) {
 				nextShootTime:    0,
 				health:           eInfo.health,
 				info:             eInfo,
-				isSmart:          true,
 			}
 		])
 	}
@@ -292,10 +291,17 @@ onUpdate(() => {
 		let target = player.pos;
 		let distanceToPlayer = c.pos.sdist(player.pos);
 
-		if (c.isSmart) {
+		if (c.info.aimSkill == 1) {
 			target = target.add(
 				player.movementVec.scale(
 					UNIT * PLAYER_SPEED * 2 / BULLETS.appleSeed.speed
+				)
+			);
+		}
+		if (c.info.aimSkill == 2) {
+			target = target.add(
+				player.movementVec.scale(
+					Math.sqrt(distanceToPlayer) * PLAYER_SPEED / BULLETS.appleSeed.speed
 				)
 			);
 		}
