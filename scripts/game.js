@@ -19,7 +19,9 @@ const gameScene = add([ timer() ]);
 
 
 
-// Arena set-up
+// ------------------------- //
+// ---   INITIAL SETUP   --- //
+// ------------------------- //
 
 let arenaWidth = ARENA_DIMENSIONS[0];
 let arenaHeight = ARENA_DIMENSIONS[1];
@@ -35,6 +37,8 @@ gameScene.add([
 	fixed(),
 	z(LAYERS.ground - 1),
 ])
+
+// Grass tiles
 
 for (let x = 0; x < arenaWidth; x++) {
 	for (let y = 0; y < arenaHeight; y++) {
@@ -77,7 +81,7 @@ for (let x = 0; x < arenaWidth; x++) {
 	}
 }
 
-// Player
+// Summon player
 
 const player = gameScene.add([
 	sprite('bean'),
@@ -94,14 +98,14 @@ const player = gameScene.add([
 		nextShootTime: 0,
 		health: 100,
 		movementVec: vec2(0,0),
-		dash: {
-			lastDashTime: 0,
-			isDashing: false,
-		},
 	}
 ])
 
-// Enemy queue and summoning
+// ----------------------- //
+// ---    FUNCTIONS    --- //
+// ----------------------- //
+
+// Enemy queue
 
 function increaseQueue() {
 	let delay = 10 - Math.min(9, time()/15);
@@ -111,6 +115,8 @@ function increaseQueue() {
 	gameScene.wait(delay, increaseQueue);
 }
 increaseQueue();
+
+// Summon enemy
 
 function summonEnemy(data) {
 	// data: {type, count}
@@ -204,45 +210,35 @@ function bulletCollision(b, c) {
 
 
 
-// Buttons
+// ---------------------------- //
+// ---  EVENTS AND BUTTONS  --- //
+// ---------------------------- //
 
-onMousePress(() => {
+onButtonPress('pause', () => {
+	gameScene.paused = !gameScene.paused;
+})
+
+gameScene.onMousePress(() => {
 	pressButton('shoot');
 })
 
-onButtonPress('shoot', () => {
+gameScene.onButtonPress('shoot', () => {
 	if (time() > player.nextShootTime) attack({
 		source: player,
 		type:   'appleSeed',
 	});
 })
 
-onButtonPress('pause', () => {
-	gameScene.paused = !gameScene.paused;
-})
-
-onButtonPress('dash', () => {
-	if (time() > player.dash.lastDashTime + 2) {
-		player.dash.lastDashTime = time();
-		player.dash.isDashing = true;
-		
-		gameScene.wait(0.2, () => {
-			player.dash.isDashing = false;
-		})
-	}
-})
-
 // Change player angle 
 
-onMouseMove(() => {
-	if (!player.dash.isDashing) {
-		player.angle = toWorld(mousePos()).angle(player.pos) - 90;
-	}
+gameScene.onMouseMove(() => {
+	player.angle = toWorld(mousePos()).angle(player.pos) - 90;
 })
 
 
-
-
+// ---------------------------- //
+// ---  SPARSE 1/5s UPDATE  --- //
+// ---------------------------- //
 
 gameScene.loop(0.2, () => {
 	// Check for offscreen 
@@ -267,11 +263,12 @@ gameScene.loop(0.2, () => {
 
 })
 
+// ---------------------------- //
+// ---  EVERY FRAME UPDATE  --- //
+// ---------------------------- //
 
 
-
-
-onUpdate(() => {
+gameScene.onUpdate(() => {
 
 	// Summon enemies
 
@@ -285,9 +282,11 @@ onUpdate(() => {
 	
 	GAME_STATUS.SUMMON_QUEUE = 0;
 
-	// Enemy movement
 
 	gameScene.get('enemy').forEach((c) => {
+
+		// Enemy targetting/aiming
+
 		let target = player.pos;
 		let distanceToPlayer = c.pos.sdist(player.pos);
 
@@ -309,6 +308,7 @@ onUpdate(() => {
 		let angle = target.angle(c.pos) - 90;
 		c.angle = angle;
 
+		// Enemy movement
 		
 		if (distanceToPlayer > (UNIT * c.approachDistance)**2) {
 			c.pos = c.pos.add(
@@ -345,22 +345,13 @@ onUpdate(() => {
 	
 	// Player movement
 	
-	if (player.dash.isDashing) {
-		// Dash
-		player.pos = player.pos.add(
-			player.movementVec.scale(
-				UNIT * dt() * DASH_SPEED
-			)
-		);
-	} else {
-		// No dash
-		player.movementVec = newMovementVec.unit();
-		player.pos = player.pos.add(
-			player.movementVec.scale(
-				UNIT * dt() * PLAYER_SPEED
-			)
-		);
-	}
+	player.movementVec = newMovementVec.unit();
+	player.pos = player.pos.add(
+		player.movementVec.scale(
+			UNIT * dt() * PLAYER_SPEED
+		)
+	);
+
 
 	// Bullet collision
 

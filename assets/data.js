@@ -2,7 +2,7 @@
 	damage:		damage
 	speed:		UNITS / sec
 	size:		sprite width (px)
-	scale:		in game size (UNITS)
+	scale:		in game width (UNITS)
 */
 
 const BULLETS = {
@@ -19,8 +19,8 @@ const BULLETS = {
 	speed:		UNITS / sec
 	health:		health
 	size:		sprite width (px)
-	scale:		in game size (UNITS)
-	aimSkill:	attack predicts player movement (0 or 1)
+	scale:		in game width (UNITS)
+	aimSkill:	attack predicts player movement (0, 1, or 2)
 */
 
 const ENEMIES = {
