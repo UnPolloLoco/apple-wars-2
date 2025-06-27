@@ -7,16 +7,10 @@ const LAYERS = {
 setCamPos(0, 0);
 
 const GAME_STATUS = {
-	CAMERA: {
-		CURRENT_SHIFT: vec2(0),
-	},
-	ENEMIES: {
-		SUMMON_QUEUE: 0,
-	},
-	DEBUG: {
-		CHAR_OFFSCREEN: 0,
-		CHAR_ONSCREEN: 0,
-	}
+	CURRENT_CAM_SHIFT: vec2(0),
+	SUMMON_QUEUE: 0,
+	CHAR_OFFSCREEN: 0,
+	CHAR_ONSCREEN: 0,
 }
 
 const gameScene = add([ timer() ]);
@@ -113,7 +107,7 @@ function increaseQueue() {
 	let delay = 10 - Math.min(9, time()/15);
 	let count = 5 + Math.floor(time() / 15);
 
-	GAME_STATUS.ENEMIES.SUMMON_QUEUE += count;
+	GAME_STATUS.SUMMON_QUEUE += count;
 	gameScene.wait(delay, increaseQueue);
 }
 increaseQueue();
@@ -140,6 +134,7 @@ function summonEnemy(data) {
 				nextShootTime:    0,
 				health:           eInfo.health,
 				info:             eInfo,
+				isSmart:          true,
 			}
 		])
 	}
@@ -249,9 +244,10 @@ onMouseMove(() => {
 
 
 
-// Check for offscreen 
 
 gameScene.loop(0.2, () => {
+	// Check for offscreen 
+
 	let off = 0;
 	let on = 0;
 
@@ -267,8 +263,9 @@ gameScene.loop(0.2, () => {
 		}
 	})
 
-	GAME_STATUS.DEBUG.CHAR_ONSCREEN = on;
-	GAME_STATUS.DEBUG.CHAR_OFFSCREEN = off;
+	GAME_STATUS.CHAR_ONSCREEN = on;
+	GAME_STATUS.CHAR_OFFSCREEN = off;
+
 })
 
 
@@ -284,19 +281,29 @@ onUpdate(() => {
 	
 	summonEnemy({
 		type: eType,
-		count: GAME_STATUS.ENEMIES.SUMMON_QUEUE,
+		count: GAME_STATUS.SUMMON_QUEUE,
 	});
 	
-	GAME_STATUS.ENEMIES.SUMMON_QUEUE = 0;
+	GAME_STATUS.SUMMON_QUEUE = 0;
 
 	// Enemy movement
 
 	gameScene.get('enemy').forEach((c) => {
-		let angle = player.pos.angle(c.pos) - 90;
-		c.angle = angle;
-
+		let target = player.pos;
 		let distanceToPlayer = c.pos.sdist(player.pos);
 
+		if (c.isSmart) {
+			target = target.add(
+				player.movementVec.scale(
+					UNIT * PLAYER_SPEED * 2 / BULLETS.appleSeed.speed
+				)
+			);
+		}
+
+		let angle = target.angle(c.pos) - 90;
+		c.angle = angle;
+
+		
 		if (distanceToPlayer > (UNIT * c.approachDistance)**2) {
 			c.pos = c.pos.add(
 				Vec2.fromAngle(angle + 90)
@@ -387,7 +394,7 @@ onUpdate(() => {
 
 	// Offset
 	let nextCamOffset = (
-		GAME_STATUS.CAMERA.CURRENT_SHIFT.sub(
+		GAME_STATUS.CURRENT_CAM_SHIFT.sub(
 			targetCamOffset
 		).scale(
 			2 ** -(CAMERA_SHIFT_SPEED * dt())
@@ -395,14 +402,14 @@ onUpdate(() => {
 			targetCamOffset
 		)
 	);
-	GAME_STATUS.CAMERA.CURRENT_SHIFT = nextCamOffset;
+	GAME_STATUS.CURRENT_CAM_SHIFT = nextCamOffset;
 	setCamPos(player.pos.add(nextCamOffset));
 
 	// Debug info
 
 	if (debug.inspect) {
-		let on = GAME_STATUS.DEBUG.CHAR_ONSCREEN;
-		let onOffTotal = GAME_STATUS.DEBUG.CHAR_ONSCREEN + GAME_STATUS.DEBUG.CHAR_OFFSCREEN;
+		let on = GAME_STATUS.CHAR_ONSCREEN;
+		let onOffTotal = GAME_STATUS.CHAR_ONSCREEN + GAME_STATUS.CHAR_OFFSCREEN;
 
 		debug.clearLog();
 		debug.log(`
@@ -412,6 +419,6 @@ onUpdate(() => {
 	}
 
 	if (isKeyDown('z')) setCamScale(0.4);
-	if (isKeyDown('x')) { GAME_STATUS.ENEMIES.SUMMON_QUEUE += 5; };
+	if (isKeyDown('x')) { GAME_STATUS.SUMMON_QUEUE += 5; };
 
 })
