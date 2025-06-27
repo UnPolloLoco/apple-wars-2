@@ -110,8 +110,11 @@ const player = gameScene.add([
 // Enemy queue and summoning
 
 function increaseQueue() {
-	GAME_STATUS.ENEMIES.SUMMON_QUEUE += 5;
-	gameScene.wait(10, increaseQueue);
+	let delay = 10 - Math.min(9, time()/15);
+	let count = 5 + Math.floor(time() / 15);
+
+	GAME_STATUS.ENEMIES.SUMMON_QUEUE += count;
+	gameScene.wait(delay, increaseQueue);
 }
 increaseQueue();
 
