@@ -95,15 +95,30 @@ const player = gameScene.add([
 	"character",
 	"ally",
 	{
-		nextShootTime: 0,
-		health: 100,
-		movementVec: vec2(0,0),
+		nextShootTime:	0,
+		health:			100,
+		movementVec:	vec2(0,0),
+		knockbackVec:	vec2(0,0),
 	}
 ])
 
 // ----------------------- //
 // ---    FUNCTIONS    --- //
 // ----------------------- //
+
+// Decay by time
+
+function decay(start, end, speed) {
+	return (
+		start.sub(
+			end
+		).scale(
+			2 ** -(speed * dt())
+		).add(
+			end
+		)
+	);
+}
 
 // Enemy queue
 
@@ -136,10 +151,11 @@ function summonEnemy(data) {
 			"character",
 			"enemy",
 			{
-				approachDistance: rand(3,4.5),
-				nextShootTime:    0,
-				health:           eInfo.health,
-				info:             eInfo,
+				approachDistance:	rand(3,4.5),
+				nextShootTime:		0,
+				health:				eInfo.health,
+				info:				eInfo,
+				knockbackVec:		vec2(0,0),
 			}
 		])
 	}
@@ -193,10 +209,8 @@ function death(victim) {
 
 function bulletCollision(b, c) {
 	if (c.is('enemy') != b.isFromEnemy) {
-		// Victim bounces back
-		c.pos = c.pos.add(
-			Vec2.fromAngle(b.angle + 90).scale(UNIT / 8)
-		);
+		// Set victim knockback
+		c.knockbackVec = Vec2.fromAngle(b.angle + 90).scale(UNIT * 5);
 
 		// Damage victim
 		c.health -= b.info.damage;
@@ -205,6 +219,13 @@ function bulletCollision(b, c) {
 		// 'Damage' bullet
 		destroy(b);
 	}
+}
+
+// Knockback
+
+function processKnockback(c) {
+	c.pos = c.pos.add(c.knockbackVec.scale(dt()));
+	c.knockbackVec = decay(c.knockbackVec, vec2(0,0), KB_DECAY_RATE);
 }
 
 
@@ -309,13 +330,15 @@ gameScene.onUpdate(() => {
 		c.angle = angle;
 
 		// Enemy movement
-		
+
 		if (distanceToPlayer > (UNIT * c.approachDistance)**2) {
 			c.pos = c.pos.add(
 				Vec2.fromAngle(angle + 90)
 				.scale(UNIT * c.info.speed * dt())
 			);
 		}
+
+		processKnockback(c);
 		
 		// Enemy attack
 
@@ -351,6 +374,8 @@ gameScene.onUpdate(() => {
 			UNIT * dt() * PLAYER_SPEED
 		)
 	);
+
+	processKnockback(player);
 
 
 	// Bullet collision
@@ -390,14 +415,10 @@ gameScene.onUpdate(() => {
 	);
 
 	// Offset
-	let nextCamOffset = (
-		GAME_STATUS.CURRENT_CAM_SHIFT.sub(
-			targetCamOffset
-		).scale(
-			2 ** -(CAMERA_SHIFT_SPEED * dt())
-		).add(
-			targetCamOffset
-		)
+	let nextCamOffset = decay(
+		GAME_STATUS.CURRENT_CAM_SHIFT,
+		targetCamOffset,
+		CAMERA_SHIFT_SPEED,
 	);
 	GAME_STATUS.CURRENT_CAM_SHIFT = nextCamOffset;
 	setCamPos(player.pos.add(nextCamOffset));

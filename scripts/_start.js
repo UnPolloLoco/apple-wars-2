@@ -20,8 +20,8 @@ kaboom({
 var UNIT = width() / 20;
 
 const PLAYER_SPEED = 4;
-
 const ENEMY_SPEED = 2;
+const KB_DECAY_RATE = 30;
 
 const OFFSCREEN_DISTANCE = 2;
 
