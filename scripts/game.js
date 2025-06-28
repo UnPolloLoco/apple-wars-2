@@ -8,7 +8,6 @@ setCamPos(0, 0);
 
 const GAME_STATUS = {
 	CURRENT_CAM_SHIFT: vec2(0),
-	SUMMON_QUEUE: 0,
 	CHAR_OFFSCREEN: 0,
 	CHAR_ONSCREEN: 0,
 }
@@ -120,16 +119,22 @@ function decay(start, end, speed) {
 	);
 }
 
-// Enemy queue
+// Enemy waves
 
-function increaseQueue() {
+function summonEnemyWave() {
+	let baseCount = 5;
+	let eType = 'basic';
+	
+	summonEnemy({
+		type:  eType, 
+		count: Math.floor(baseCount * (1 + time() / 75)),
+	});
+
 	let delay = 10 - Math.min(9, time()/15);
-	let count = 5 + Math.floor(time() / 15);
 
-	GAME_STATUS.SUMMON_QUEUE += count;
-	gameScene.wait(delay, increaseQueue);
+	gameScene.wait(delay, summonEnemyWave);
 }
-increaseQueue();
+summonEnemyWave();
 
 // Summon enemy
 
@@ -291,19 +296,6 @@ gameScene.loop(0.2, () => {
 
 gameScene.onUpdate(() => {
 
-	// Summon enemies
-
-	let eType = 'basic';
-	//if (rand() < 0.25) eType = 'swift';
-	
-	summonEnemy({
-		type: eType,
-		count: GAME_STATUS.SUMMON_QUEUE,
-	});
-	
-	GAME_STATUS.SUMMON_QUEUE = 0;
-
-
 	gameScene.get('enemy').forEach((c) => {
 
 		// Enemy targetting/aiming
@@ -437,6 +429,6 @@ gameScene.onUpdate(() => {
 	}
 
 	if (isKeyDown('z')) setCamScale(0.4);
-	if (isKeyDown('x')) { GAME_STATUS.SUMMON_QUEUE += 5; };
+	if (isKeyDown('x')) { summonEnemy({type: 'basic', count: 5}); };
 
 })
