@@ -242,6 +242,27 @@ function processKnockback(c) {
 	c.knockbackVec = decay(c.knockbackVec, vec2(0,0), KB_DECAY_RATE);
 }
 
+// Border wall
+
+function borderResolve(p) {
+	let borderX = (arenaWidth - 0.15) * UNIT * ARENA_TILE_SIZE / 2;
+	let borderY = (arenaHeight - 0.15) * UNIT * ARENA_TILE_SIZE / 2;
+	let newPos = p;
+
+	if (p.x > borderX) { // x
+		newPos.x = borderX;
+	} else if (p.x < -borderX) {
+		newPos.x = -borderX;
+	}
+
+	if (p.y > borderY) { // y
+		newPos.y = borderY;
+	} else if (p.y < -borderY) {
+		newPos.y = -borderY;
+	}
+
+	return newPos;
+}
 
 
 
@@ -327,6 +348,8 @@ gameScene.onUpdate(() => {
 			);
 		}
 
+		target = borderResolve(target);
+
 		let angle = target.angle(c.pos) - 90;
 		c.angle = angle;
 
@@ -377,6 +400,10 @@ gameScene.onUpdate(() => {
 	);
 
 	processKnockback(player);
+
+	// Player border resolution
+
+	player.pos = borderResolve(player.pos);
 
 
 	// Bullet collision

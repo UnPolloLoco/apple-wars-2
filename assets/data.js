@@ -31,7 +31,7 @@ const ENEMIES = {
 		health:		20,
 		size:		61,
 		scale:		0.85,
-		aimSkill:	0,
+		aimSkill:	2,
 		kbMulti:	1,
 	},
 	tank: {
