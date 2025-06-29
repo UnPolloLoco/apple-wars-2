@@ -125,6 +125,11 @@ function summonEnemyWave() {
 	let baseCount = 5;
 	let eType = 'basic';
 	
+	if (rand() < 0.2) {
+		baseCount = 2;
+		eType = 'tank';
+	}
+
 	summonEnemy({
 		type:  eType, 
 		count: Math.floor(baseCount * (1 + time() / 75)),
@@ -229,7 +234,11 @@ function bulletCollision(b, c) {
 // Knockback
 
 function processKnockback(c) {
-	c.pos = c.pos.add(c.knockbackVec.scale(dt()));
+	if (c.is('enemy')) {
+		c.pos = c.pos.add(c.knockbackVec.scale(dt() * c.info.kbMulti));
+	} else {
+		c.pos = c.pos.add(c.knockbackVec.scale(dt()));
+	}
 	c.knockbackVec = decay(c.knockbackVec, vec2(0,0), KB_DECAY_RATE);
 }
 
