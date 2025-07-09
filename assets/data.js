@@ -31,16 +31,25 @@ const ENEMIES = {
 		health:		20,
 		size:		61,
 		scale:		0.85,
-		aimSkill:	2,
+		aimSkill:	0,
 		kbMulti:	1,
 	},
-	tank: {
+	heavy: {
 		seeds:		['appleSeed'],
 		speed:		1.5,
-		health:		100,
+		health:		60,
 		size:		61,
 		scale:		1.25,
 		aimSkill:	1,
 		kbMulti:	0.2,
+	},
+	swift: {
+		seeds:		['appleSeed'],
+		speed:		3.5,
+		health:		10,
+		size:		61,
+		scale:		0.7,
+		aimSkill:	1,
+		kbMulti:	1.2,
 	},
 }

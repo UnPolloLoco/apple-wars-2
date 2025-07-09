@@ -127,7 +127,10 @@ function summonEnemyWave() {
 	
 	if (rand() < 0.2) {
 		baseCount = 2;
-		eType = 'tank';
+		eType = 'heavy';
+	} else if (rand() < 0.25) {
+		baseCount = 3;
+		eType = 'swift';
 	}
 
 	summonEnemy({
@@ -146,12 +149,21 @@ summonEnemyWave();
 function summonEnemy(data) {
 	// data: {type, count}
 	let eInfo = ENEMIES[data.type];
+	let clumpSpawnDir = rand(360);
 
 	for (let i = 0; i < data.count; i++) {
+		let spawnDir = rand(360);
+		let spawnDist = 18;
+
+		if (data.type == 'swift') {
+			spawnDir = clumpSpawnDir + rand(30);
+			spawnDist += rand(-1, 1);
+		}
+
 		gameScene.add([
 			sprite('bean'),
 			pos(player.pos.add(
-				Vec2.fromAngle(rand(360)).scale(UNIT * 18)
+				Vec2.fromAngle(spawnDir).scale(UNIT * spawnDist)
 			)),
 			scale(UNIT / eInfo.size * eInfo.scale),
 			anchor('center'),
