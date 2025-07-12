@@ -101,6 +101,71 @@ const player = gameScene.add([
 	}
 ])
 
+// --------------------- //
+// ---      UI       --- //
+// --------------------- //
+
+// Ability
+
+const abilityDisplay = gameScene.add([
+	pos(UNIT * 0.75),
+	sprite('placeholder'),
+	scale(UNIT / 500 * 1.5),
+	fixed(),
+	z(LAYERS.ui),
+])
+
+// Bullet Displays
+
+const bulletDisplay = gameScene.add([
+	pos(abilityDisplay.pos.add(
+		UNIT * 1.75, 0
+	)),
+	sprite('placeholder'),
+	scale(UNIT / 500 * 1.15),
+	fixed(),
+	z(LAYERS.ui),
+])
+
+const bulletDisplaySecondary = gameScene.add([
+	pos(bulletDisplay.pos.add(
+		0, UNIT * 0.75
+	)),
+	sprite('placeholder'),
+	scale(UNIT / 500 * 0.75),
+	fixed(),
+	z(LAYERS.ui - 1),
+])
+
+// Healthbar
+
+const healthBarOutline = gameScene.add([
+	pos(bulletDisplay.pos.add(
+		UNIT * 1.4, 0
+	)),
+	rect(UNIT * 5, UNIT * 0.75),
+	color(BLACK),
+	z(LAYERS.ui - 1),
+	fixed(),
+])
+
+let o = 0.07 * UNIT; // offset
+let maxWidth = UNIT*5 - 2*o; // width
+
+const healthBar = gameScene.add([
+	pos(healthBarOutline.pos.add(o, o)),
+	rect(
+		maxWidth,
+		UNIT*0.75 - 2*o,
+	),
+	color(rgb(200, 30, 30)),
+	z(LAYERS.ui),
+	fixed(),
+	{
+		maxWidth: maxWidth,
+	}
+])
+
 // ----------------------- //
 // ---    FUNCTIONS    --- //
 // ----------------------- //
@@ -236,6 +301,7 @@ function bulletCollision(b, c) {
 
 		// Damage victim
 		c.health -= b.info.damage;
+		if (c == player) updateHealthBar();
 		if (c.health <= 0) death(c);
 		
 		// 'Damage' bullet
@@ -274,6 +340,12 @@ function borderResolve(p) {
 	}
 
 	return newPos;
+}
+
+// Player healthbar
+
+function updateHealthBar() {
+	healthBar.width = healthBar.maxWidth / 100 * player.health;
 }
 
 

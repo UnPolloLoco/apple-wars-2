@@ -36,6 +36,7 @@ const ARENA_TILE_SIZE = 5;
 
 loadBean();
 
+loadSprite('placeholder', 'https://iili.io/FGY2sv2.md.png');
 loadSprite('bullet', 'https://iili.io/FqEvP2e.png');
 
 loadRoot('https://unpolloloco.github.io/apple-wars-2/assets/');
