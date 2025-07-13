@@ -1,7 +1,8 @@
 const LAYERS = {
 	ground:  100,
 	players: 200,
-	ui:      300,
+	pause:   300, 
+	ui:      400,
 }
 
 setCamPos(0, 0);
@@ -12,7 +13,9 @@ const GAME_STATUS = {
 	CHAR_ONSCREEN: 0,
 }
 
-const gameScene = add([ timer() ]);
+const gameScene =	add([ z(0), timer() ]);
+const pauseMenu =	add([ z(1), timer(), {opacityTween: null} ]);
+const ui = 			add([ z(2), timer() ]);
 
 
 
@@ -107,7 +110,7 @@ const player = gameScene.add([
 
 // Ability
 
-const abilityDisplay = gameScene.add([
+const abilityDisplay = ui.add([
 	pos(UNIT * 0.75),
 	sprite('placeholder'),
 	scale(UNIT / 500 * 1.5),
@@ -117,7 +120,7 @@ const abilityDisplay = gameScene.add([
 
 // Bullet Displays
 
-const bulletDisplay = gameScene.add([
+const bulletDisplay = ui.add([
 	pos(abilityDisplay.pos.add(
 		UNIT * 1.75, 0
 	)),
@@ -127,7 +130,7 @@ const bulletDisplay = gameScene.add([
 	z(LAYERS.ui),
 ])
 
-const bulletDisplaySecondary = gameScene.add([
+const bulletDisplaySecondary = ui.add([
 	pos(bulletDisplay.pos.add(
 		0, UNIT * 0.75
 	)),
@@ -139,7 +142,7 @@ const bulletDisplaySecondary = gameScene.add([
 
 // Healthbar
 
-const healthBarOutline = gameScene.add([
+const healthBarOutline = ui.add([
 	pos(bulletDisplay.pos.add(
 		UNIT * 1.4, 0
 	)),
@@ -152,7 +155,7 @@ const healthBarOutline = gameScene.add([
 let o = 0.07 * UNIT; // offset
 let maxWidth = UNIT*5 - 2*o; // width
 
-const healthBar = gameScene.add([
+const healthBar = ui.add([
 	pos(healthBarOutline.pos.add(o, o)),
 	rect(
 		maxWidth,
@@ -165,6 +168,42 @@ const healthBar = gameScene.add([
 		maxWidth: maxWidth,
 	}
 ])
+
+// ------------------------ //
+// ---    PAUSE MENU    --- //
+// ------------------------ //
+
+const pauseOverlay = pauseMenu.add([
+	pos(0),
+	rect(width(), height()),
+	color(BLACK),
+	fixed(),
+	z(LAYERS.pause - 1),
+	{
+		targetOpacity: 0.7,
+	}
+])
+
+const pauseLabel = pauseMenu.add([
+	pos(
+		width() - UNIT/2,
+		height() - UNIT/2,
+	),
+	text('PAUSED', {
+		size: UNIT*2,
+		align: 'right',
+	}),
+	anchor('botright'),
+	z(LAYERS.pause),
+	fixed(),
+	{
+		targetOpacity: 1,
+	}
+])
+
+pauseMenu.get('*').forEach((obj) => {
+	obj.use(opacity(0));
+})
 
 // ----------------------- //
 // ---    FUNCTIONS    --- //
@@ -356,6 +395,19 @@ function updateHealthBar() {
 
 onButtonPress('pause', () => {
 	gameScene.paused = !gameScene.paused;
+
+	if (pauseMenu.opacityTween) pauseMenu.opacityTween.cancel();
+
+	pauseMenu.get('*').forEach((obj) => {
+		pauseMenu.opacityTween = pauseMenu.tween(
+			obj.opacity,
+			obj.targetOpacity * gameScene.paused, // target if paused, 0 if unpaused
+			0.08,
+			(o) => {obj.opacity = o},
+			easings.easeInOutQuad
+		);
+	})
+
 })
 
 gameScene.onMousePress(() => {
