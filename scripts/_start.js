@@ -3,7 +3,7 @@ kaboom({
 	width: window.innerWidth,
 	height: window.innerWidth * 0.6,
 	letterbox: true,
-	pixelDensity: 1,
+	pixelDensity: 1.2,
 	crisp: true,
 	logMax: 3,
 	debugKey: 'i',

@@ -17,6 +17,9 @@ const gameScene =	add([ z(0), timer() ]);
 const pauseMenu =	add([ z(1), timer(), {opacityTween: null} ]);
 const ui = 			add([ z(2), timer() ]);
 
+const STATS = {
+	'money': 0,
+}
 
 
 
@@ -167,6 +170,18 @@ const healthBar = ui.add([
 	{
 		maxWidth: maxWidth,
 	}
+])
+
+// Money counter
+
+const moneyCounter = ui.add([
+	pos(abilityDisplay.pos.add(
+		0, UNIT*1.75
+	)),
+	text('$0', {
+		size: UNIT / 4,
+	}),
+	fixed()
 ])
 
 // ------------------------ //
@@ -327,6 +342,10 @@ function death(victim) {
 	if (victim == player) {
 		debug.log('DEAD!')
 	} else {
+		if (victim.is('enemy')) {
+			STATS.money += 1;
+			updateMoneyCounter();
+		}
 		destroy(victim);
 	}
 }
@@ -385,6 +404,12 @@ function borderResolve(p) {
 
 function updateHealthBar() {
 	healthBar.width = healthBar.maxWidth / 100 * player.health;
+}
+
+// Player money display
+
+function updateMoneyCounter() {
+	moneyCounter.text = `\$${Math.floor(STATS.money)}`;
 }
 
 
