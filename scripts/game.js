@@ -11,6 +11,7 @@ const GAME_STATUS = {
 	CURRENT_CAM_SHIFT: vec2(0),
 	CHAR_OFFSCREEN: 0,
 	CHAR_ONSCREEN: 0,
+	GAME_TIME: 0,
 }
 
 const gameScene =	add([ z(0), timer() ]);
@@ -224,6 +225,12 @@ pauseMenu.get('*').forEach((obj) => {
 // ---    FUNCTIONS    --- //
 // ----------------------- //
 
+// Get game time
+
+function gameTime() {
+	return GAME_STATUS.GAME_TIME;
+}
+
 // Decay by time
 
 function decay(start, end, speed) {
@@ -254,10 +261,10 @@ function summonEnemyWave() {
 
 	summonEnemy({
 		type:  eType, 
-		count: Math.floor(baseCount * (1 + time() / 75)),
+		count: Math.floor(baseCount * (1 + gameTime() / 75)),
 	});
 
-	let delay = 10 - Math.min(9, time()/15);
+	let delay = 10 - Math.min(9, gameTime()/15);
 
 	gameScene.wait(delay, summonEnemyWave);
 }
@@ -328,9 +335,9 @@ function attack(data) {
 	])
 
 	if (s.is('enemy')) {
-		s.nextShootTime = time() + 0.8;
+		s.nextShootTime = gameTime() + 0.8;
 	} else {
-		s.nextShootTime = time() + 0.1;
+		s.nextShootTime = gameTime() + 0.1;
 	}
 
 	bullet.wait(2.5, () => { destroy(bullet); });
@@ -440,7 +447,7 @@ gameScene.onMousePress(() => {
 })
 
 gameScene.onButtonPress('shoot', () => {
-	if (time() > player.nextShootTime) attack({
+	if (gameTime() > player.nextShootTime) attack({
 		source: player,
 		type:   'appleSeed',
 	});
@@ -527,7 +534,7 @@ gameScene.onUpdate(() => {
 		
 		// Enemy attack
 
-		if (time() > c.nextShootTime && distanceToPlayer < (UNIT * 5)**2) {
+		if (gameTime() > c.nextShootTime && distanceToPlayer < (UNIT * 5)**2) {
 			attack({
 				source: c,
 				type:   'appleSeed',
@@ -611,6 +618,10 @@ gameScene.onUpdate(() => {
 	);
 	GAME_STATUS.CURRENT_CAM_SHIFT = nextCamOffset;
 	setCamPos(player.pos.add(nextCamOffset));
+
+	// Update time
+
+	if (!gameScene.paused) GAME_STATUS.GAME_TIME += dt();
 
 	// Debug info
 
