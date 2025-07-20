@@ -1,16 +1,45 @@
 /*
+	name:		pretty title
+
 	damage:		damage
 	speed:		UNITS / sec
 	size:		sprite width (px)
 	scale:		in game width (UNITS)
+	special:
+		count:		seeds per shot
+		spread:		volley spread (use with count)
+		poison:		damage / sec (repeated 3 times)
 */
 
 const BULLETS = {
 	appleSeed: {
+		name: 'Apple Seed',
 		damage:	10,
-		speed:	12,
+		speed:	10,
 		size:	27,
 		scale:	0.3,
+		special: {}
+	},
+	strawberrySeed: {
+		name: 'Strawberry Seed',
+		damage:	5,
+		speed:	12,
+		size:	27,
+		scale:	0.2,
+		special: {
+			count:  3,
+			spread: 22,
+		}
+	},
+	cherryPit: {
+		name: 'Cherry Pit',
+		damage:	12,
+		speed:	12,
+		size:	27,
+		scale:	0.2,
+		special: {
+			poison: 4, // 12
+		}
 	}
 }
 

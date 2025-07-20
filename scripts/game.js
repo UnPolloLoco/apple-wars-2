@@ -180,7 +180,7 @@ const moneyCounter = ui.add([
 		0, UNIT*1.75
 	)),
 	text('$0', {
-		size: UNIT / 4,
+		size: UNIT / 3,
 	}),
 	fixed()
 ])
@@ -317,30 +317,39 @@ function attack(data) {
 	let bInfo = BULLETS[data.type];
 	let s = data.source;
 
-	let bullet = gameScene.add([
-		sprite('bullet'),
-		pos(s.pos),
-		scale(UNIT / bInfo.size * bInfo.scale),
-		rotate(s.angle),
-		move(s.angle + 90, UNIT*bInfo.speed),
-		anchor('center'),
-		z(LAYERS.players - 1),
-		timer(),
-		"bullet",
-		{
-			source:      s,
-			info:        bInfo,
-			isFromEnemy: s.is('enemy'),
-		}
-	])
+	let bulletCount = 1;
+	if (bInfo.special.count) bulletCount = bInfo.special.count;
+	let relativeSpread = Math.floor(bulletCount / 2);
+
+	for (let n = 0; n < bulletCount; n++) {
+		let bAngle = s.angle += rand(-BULLET_SPREAD, BULLET_SPREAD);
+		if (bInfo.special.count) bAngle += (n - relativeSpread) * bInfo.special.spread / relativeSpread / 2;
+
+		let bullet = gameScene.add([
+			sprite('bullet'),
+			pos(s.pos),
+			scale(UNIT / bInfo.size * bInfo.scale),
+			rotate(bAngle),
+			move(bAngle+90, UNIT*bInfo.speed),
+			anchor('center'),
+			z(LAYERS.players - 1),
+			timer(),
+			"bullet",
+			{
+				source:      s,
+				info:        bInfo,
+				isFromEnemy: s.is('enemy'),
+			}
+		])
+	
+		bullet.wait(2.5, () => { destroy(bullet); });
+	}
 
 	if (s.is('enemy')) {
 		s.nextShootTime = gameTime() + 0.8;
 	} else {
 		s.nextShootTime = gameTime() + 0.1;
 	}
-
-	bullet.wait(2.5, () => { destroy(bullet); });
 }
 
 // Death 
@@ -449,7 +458,7 @@ gameScene.onMousePress(() => {
 gameScene.onButtonPress('shoot', () => {
 	if (gameTime() > player.nextShootTime) attack({
 		source: player,
-		type:   'appleSeed',
+		type:   'strawberrySeed',
 	});
 })
 
