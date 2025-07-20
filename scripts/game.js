@@ -376,7 +376,15 @@ function bulletCollision(b, c) {
 		// Damage victim
 		c.health -= b.info.damage;
 		if (c == player) updateHealthBar();
-		if (c.health <= 0) death(c);
+
+		if (c.health <= 0) {
+			// Death
+			death(c);
+		} else {
+			// Impact effects
+			c.use(shader('flash', () => (DAMAGE_FLASH)));
+			gameScene.wait(0.05, () => { c.unuse('shader') })
+		}
 		
 		// 'Damage' bullet
 		destroy(b);

@@ -25,6 +25,8 @@ const ENEMY_SPEED = 2;
 const KB_DECAY_RATE = 30;
 const BULLET_SPREAD = 2;
 
+const DAMAGE_FLASH = { r:1, g:1, b:1, strength:0.65 };
+
 const OFFSCREEN_DISTANCE = 2;
 
 const CAMERA_ZOOM_SPEED = 4;
@@ -47,3 +49,27 @@ loadSprite('grass', 'sprites/grass.png', {
 	sliceX: 3,
 	sliceY: 3,
 });
+
+
+loadShader(
+	'flash', null, `
+
+	uniform float r;
+	uniform float g;
+	uniform float b;
+	uniform float strength;
+
+	vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
+		vec4 c = def_frag();
+
+		if (c.r < 0.2 && c.g < 0.2 && c.b < 0.2) {
+			return vec4(c.r, c.g, c.b, c.a);
+		} else {
+			return mix(
+				c,
+				vec4(r, g, b, c.a),
+				strength
+			);
+		}
+	}`
+);
