@@ -17,7 +17,7 @@ const BULLETS = {
 		damage:	10,
 		speed:	10,
 		size:	27,
-		scale:	0.3,
+		scale:	0.28,
 		special: {}
 	},
 	strawberrySeed: {
@@ -36,7 +36,7 @@ const BULLETS = {
 		damage:	12,
 		speed:	12,
 		size:	27,
-		scale:	0.2,
+		scale:	0.31,
 		special: {
 			poison: 4, // 12
 		}

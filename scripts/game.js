@@ -105,6 +105,11 @@ const player = gameScene.add([
 		health:			100,
 		movementVec:	vec2(0,0),
 		knockbackVec:	vec2(0,0),
+		poison: {
+			damage:				0,
+			nextTick:			0,
+			ticksRemaining:		0,
+		},
 	}
 ])
 
@@ -304,6 +309,11 @@ function summonEnemy(data) {
 				health:				eInfo.health,
 				info:				eInfo,
 				knockbackVec:		vec2(0,0),
+				poison: {
+					damage:				0,
+					nextTick:			0,
+					ticksRemaining:		0,
+				},
 			}
 		])
 	}
@@ -384,6 +394,16 @@ function bulletCollision(b, c) {
 			// Impact effects
 			c.use(shader('flash', () => (DAMAGE_FLASH)));
 			gameScene.wait(0.05, () => { c.unuse('shader') })
+
+			// Poison
+			if (b.info.special.poison) {
+				c.poison = {
+					damage:			b.info.special.poison,
+					nextTick:		gameTime() + 1,
+					ticksRemaining: 3, // Always 3 ticks total
+				};
+				c.tag('poisoned');
+			}
 		}
 		
 		// 'Damage' bullet
@@ -466,7 +486,7 @@ gameScene.onMousePress(() => {
 gameScene.onButtonPress('shoot', () => {
 	if (gameTime() > player.nextShootTime) attack({
 		source: player,
-		type:   'strawberrySeed',
+		type:   'cherryPit',
 	});
 })
 
@@ -544,6 +564,7 @@ gameScene.onUpdate(() => {
 			c.pos = c.pos.add(
 				Vec2.fromAngle(angle + 90)
 				.scale(UNIT * c.info.speed * dt())
+				.scale(c.is('poisoned') ? POISON_SPEED_MULTI : 1)
 			);
 		}
 
@@ -610,6 +631,33 @@ gameScene.onUpdate(() => {
 				bulletCollision(b, v);
 				break;
 			}
+		}
+	})
+
+	// Poison control (get it??)
+
+	gameScene.get('poisoned').forEach((c) => {
+		let p = c.poison;
+
+		if (gameTime() > p.nextTick) {
+			// do damage
+			c.health -= p.damage;
+			if (c.health <= 0) {
+				death(c);
+			} else {
+				c.use(shader('flash', () => (POISON_FLASH)));
+				gameScene.wait(0.05, () => { c.unuse('shader') })
+			}
+
+			// setup next tick or end poison
+			p.ticksRemaining--;
+
+			if (p.ticksRemaining > 0) {
+				p.nextTick = gameTime() + 1;
+			} else {
+				c.untag('poisoned');
+			}
+
 		}
 	})
 
