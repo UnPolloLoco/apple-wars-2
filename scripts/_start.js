@@ -24,10 +24,14 @@ const ENEMY_SPEED = 2;
 
 const KB_DECAY_RATE = 30;
 const BULLET_SPREAD = 2;
-const POISON_SPEED_MULTI = 0.6;
+const POISON_SPEED_MULTI = 0.4;
 
 const DAMAGE_FLASH = { r:1, g:1, b:1, strength:0.65 };
 const POISON_FLASH = { r:0.6, g:0.3, b:1, strength:0.85 };
+
+const PASSIVE_HEAL_DELAY = 1.5; // Time after taking damage until healing starts
+const HEAL_RATE = 5;
+const SLOW_HEAL_DURATION = 4;
 
 const OFFSCREEN_DISTANCE = 2;
 

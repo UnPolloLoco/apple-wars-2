@@ -105,6 +105,7 @@ const player = gameScene.add([
 		health:			100,
 		movementVec:	vec2(0,0),
 		knockbackVec:	vec2(0,0),
+		lastHitTime:	-10,
 		poison: {
 			damage:				0,
 			nextTick:			0,
@@ -309,6 +310,7 @@ function summonEnemy(data) {
 				health:				eInfo.health,
 				info:				eInfo,
 				knockbackVec:		vec2(0,0),
+				lastHitTime:		-10,
 				poison: {
 					damage:				0,
 					nextTick:			0,
@@ -382,6 +384,7 @@ function bulletCollision(b, c) {
 	if (c.is('enemy') != b.isFromEnemy) {
 		// Set victim knockback
 		c.knockbackVec = Vec2.fromAngle(b.angle + 90).scale(UNIT * 5);
+		c.lastHitTime = gameTime();
 
 		// Damage victim
 		c.health -= b.info.damage;
@@ -606,6 +609,32 @@ gameScene.onUpdate(() => {
 	);
 
 	processKnockback(player);
+
+	// Player passive regen
+
+	if (player.health < 100) {
+		let timeSinceHit = gameTime() - player.lastHitTime;
+
+		if (timeSinceHit > PASSIVE_HEAL_DELAY) {
+			// Eligible for healing
+			let healAmount;
+
+			if (timeSinceHit > PASSIVE_HEAL_DELAY + SLOW_HEAL_DURATION) {
+				// Max heal rate
+				healAmount = 1;
+			} else {
+				// Slowed heal rate
+				let t = (timeSinceHit - PASSIVE_HEAL_DELAY) / SLOW_HEAL_DURATION;
+				healAmount = t < 0.5 ? (4 * t**3) : (4 * (t-1)**3 + 1);
+			}
+
+			player.health = Math.min(
+				100,
+				player.health + healAmount * dt() * HEAL_RATE
+			);
+			updateHealthBar();
+		}
+	}
 
 	// Player border resolution
 
