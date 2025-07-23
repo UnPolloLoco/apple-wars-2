@@ -156,26 +156,44 @@ const healthBarOutline = ui.add([
 	pos(bulletDisplay.pos.add(
 		UNIT * 1.4, 0
 	)),
-	rect(UNIT * 5, UNIT * 0.75),
+	rect(UNIT * 6, UNIT * 0.75),
 	color(BLACK),
 	z(LAYERS.ui - 1),
 	fixed(),
 ])
 
 let o = 0.07 * UNIT; // offset
-let maxWidth = UNIT*5 - 2*o; // width
+let maxWidth = healthBarOutline.width - 2*o; // width
 
 const healthBar = ui.add([
 	pos(healthBarOutline.pos.add(o, o)),
 	rect(
 		maxWidth,
-		UNIT*0.75 - 2*o,
+		healthBarOutline.height - 2*o,
 	),
 	color(rgb(200, 30, 30)),
 	z(LAYERS.ui),
 	fixed(),
 	{
 		maxWidth: maxWidth,
+	}
+])
+
+const healthBarTransition = ui.add([
+	pos(healthBar.pos.add(
+		healthBar.width,
+		0
+	)),
+	rect(
+		0,
+		healthBar.height,
+	),
+	color(WHITE),
+	z(LAYERS.ui + 1),
+	fixed(),
+	{
+		tween:		null,
+		lastHealth: 100,
 	}
 ])
 
@@ -188,7 +206,8 @@ const moneyCounter = ui.add([
 	text('$0', {
 		size: UNIT / 3,
 	}),
-	fixed()
+	fixed(),
+	z(LAYERS.ui),
 ])
 
 // ------------------------ //
@@ -451,6 +470,27 @@ function borderResolve(p) {
 
 function updateHealthBar() {
 	healthBar.width = healthBar.maxWidth / 100 * player.health;
+
+	// The white transition section
+	if (player.health < healthBarTransition.lastHealth) {
+		let lastPos = healthBarTransition.pos.x;
+
+		// Set pre-tween size and position
+		healthBarTransition.pos.x = healthBar.pos.x + Math.max(0, healthBar.width);
+		healthBarTransition.width += lastPos - healthBarTransition.pos.x;
+		
+		if (healthBarTransition.tween) healthBarTransition.tween.cancel();
+
+		healthBarTransition.tween = gameScene.tween(
+			healthBarTransition.width,
+			0,
+			0.3,
+			(w) => {healthBarTransition.width = w},
+			easings.easeOutCubic
+		);
+
+		debug.log(Math.round(healthBarTransition.width))
+	}
 }
 
 // Player money display
