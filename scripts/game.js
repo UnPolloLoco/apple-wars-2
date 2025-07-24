@@ -397,6 +397,18 @@ function death(victim) {
 	}
 }
 
+// Damage flash VFX
+
+function damageFlash(victim, flashType) {
+	let flashData = {
+		'basic':  DAMAGE_FLASH,
+		'poison': POISON_FLASH,
+	}[flashType];
+
+	victim.use(shader('flash', () => (flashData)));
+	gameScene.wait(0.05, () => { victim.unuse('shader') })
+}
+
 // Bullet collide function
 
 function bulletCollision(b, c) {
@@ -414,8 +426,7 @@ function bulletCollision(b, c) {
 			death(c);
 		} else {
 			// Impact effects
-			c.use(shader('flash', () => (DAMAGE_FLASH)));
-			gameScene.wait(0.05, () => { c.unuse('shader') })
+			damageFlash(c, 'basic');
 
 			// Poison
 			if (b.info.special.poison) {
@@ -488,8 +499,6 @@ function updateHealthBar() {
 			(w) => {healthBarTransition.width = w},
 			easings.easeOutCubic
 		);
-
-		debug.log(Math.round(healthBarTransition.width))
 	}
 }
 
@@ -714,8 +723,7 @@ gameScene.onUpdate(() => {
 			if (c.health <= 0) {
 				death(c);
 			} else {
-				c.use(shader('flash', () => (POISON_FLASH)));
-				gameScene.wait(0.05, () => { c.unuse('shader') })
+				damageFlash(c, 'poison');
 			}
 
 			// setup next tick or end poison
