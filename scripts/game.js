@@ -23,7 +23,7 @@ const STATS = {
 }
 
 
-
+var totaldmg = 0; var totalPsn = 0;
 
 // ------------------------- //
 // ---   INITIAL SETUP   --- //
@@ -418,6 +418,7 @@ function bulletCollision(b, c) {
 		c.lastHitTime = gameTime();
 
 		// Damage victim
+		if (c != player) totaldmg += Math.min(c.health, b.info.damage); // deleteme 
 		c.health -= b.info.damage;
 		if (c == player) updateHealthBar();
 
@@ -432,8 +433,8 @@ function bulletCollision(b, c) {
 			if (b.info.special.poison) {
 				c.poison = {
 					damage:			b.info.special.poison,
-					nextTick:		gameTime() + 1,
-					ticksRemaining: 3, // Always 3 ticks total
+					nextTick:		gameTime() + POISON_TICK_INTERVAL,
+					ticksRemaining: POISON_TICK_COUNT,
 				};
 				c.tag('poisoned');
 			}
@@ -719,6 +720,7 @@ gameScene.onUpdate(() => {
 
 		if (gameTime() > p.nextTick) {
 			// do damage
+			totalPsn += Math.min(c.health, p.damage); //deleteme
 			c.health -= p.damage;
 			if (c.health <= 0) {
 				death(c);
@@ -730,7 +732,7 @@ gameScene.onUpdate(() => {
 			p.ticksRemaining--;
 
 			if (p.ticksRemaining > 0) {
-				p.nextTick = gameTime() + 1;
+				p.nextTick = gameTime() + POISON_TICK_INTERVAL;
 			} else {
 				c.untag('poisoned');
 			}
@@ -777,6 +779,8 @@ gameScene.onUpdate(() => {
 			draw:  ${debug.drawCalls()}
 		`);
 	}
+
+	debug.log(`${totaldmg}d -- ${totalPsn}p -- $${STATS.money}`)
 
 	if (isKeyDown('z')) setCamScale(0.4);
 	if (isKeyDown('x')) { summonEnemy({type: 'basic', count: 5}); };

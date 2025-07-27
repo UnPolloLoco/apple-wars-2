@@ -22,23 +22,23 @@ const BULLETS = {
 	},
 	strawberrySeed: {
 		name: 'Strawberry Seed',
-		damage:	5,
+		damage:	6,
 		speed:	12,
 		size:	27,
 		scale:	0.2,
 		special: {
 			count:  3,
-			spread: 22,
+			spread: 20,
 		}
 	},
 	cherryPit: {
 		name: 'Cherry Pit',
 		damage:	12,
-		speed:	12,
+		speed:	10,
 		size:	27,
-		scale:	0.31,
+		scale:	0.3,
 		special: {
-			poison: 4, // 12
+			poison: 2, // 20
 		}
 	}
 }
