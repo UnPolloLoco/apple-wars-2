@@ -214,16 +214,18 @@ const moneyCounter = ui.add([
 // ---    PAUSE MENU    --- //
 // ------------------------ //
 
-const pauseOverlay = pauseMenu.add([
+pauseMenu.add([
 	pos(0),
 	rect(width(), height()),
 	color(BLACK),
 	fixed(),
-	z(LAYERS.pause - 1),
+	z(LAYERS.pause - 10),
 	{
 		targetOpacity: 0.7,
 	}
 ])
+
+// "Pause" text
 
 const pauseLabel = pauseMenu.add([
 	pos(
@@ -231,7 +233,7 @@ const pauseLabel = pauseMenu.add([
 		height() - UNIT/2,
 	),
 	text('PAUSED', {
-		size: UNIT*2,
+		size: UNIT*2.5,
 		align: 'right',
 	}),
 	anchor('botright'),
@@ -241,6 +243,48 @@ const pauseLabel = pauseMenu.add([
 		targetOpacity: 1,
 	}
 ])
+
+// Options backdrop
+
+pauseMenu.add([
+	pos(width() - UNIT*1.25, 0),
+	rect(UNIT*7.5, height()),
+	anchor('topright'),
+	color(BLACK),
+	z(LAYERS.pause - 1),
+	fixed(),
+	{
+		targetOpacity: 0.5,
+	}
+])
+
+// Options buttons
+
+let pauseMenuOptions = [
+	['Resume', () => { pressButton('pause') }],
+	['Settings', () => { pressButton('pause') }],
+	['Quit', () => { alert('quit') }],
+]
+
+for (let i = 0; i < pauseMenuOptions.length; i++) {
+	pauseMenu.add([
+		pos(
+			width() - UNIT*8,
+			height() - UNIT*4.5 - UNIT*(pauseMenuOptions.length - i - 1)*1.25
+		),
+		text(pauseMenuOptions[i][0], {
+			size: UNIT*0.75,
+			//align: 'right',
+		}),
+		color(rgb(200,200,200)),
+		z(LAYERS.pause),
+		anchor('botleft'),
+		fixed(),
+		{
+			targetOpacity: 1,
+		}
+	])
+}
 
 pauseMenu.get('*').forEach((obj) => {
 	obj.use(opacity(0));
@@ -780,7 +824,7 @@ gameScene.onUpdate(() => {
 		`);
 	}
 
-	debug.log(`${totaldmg}d -- ${totalPsn}p -- $${STATS.money}`)
+	//debug.log(`${totaldmg}d -- ${totalPsn}p -- $${STATS.money}`)
 
 	if (isKeyDown('z')) setCamScale(0.4);
 	if (isKeyDown('x')) { summonEnemy({type: 'basic', count: 5}); };
