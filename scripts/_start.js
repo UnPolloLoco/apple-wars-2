@@ -17,7 +17,7 @@ kaboom({
 	width: kaWidth,
 	height: kaHeight,
 	letterbox: true,
-	pixelDensity: 4,
+	pixelDensity: 1,
 	//crisp: true,
 	logMax: 3,
 	debugKey: 'i',
