@@ -1,10 +1,24 @@
+let wiw = window.innerWidth;
+let wih = window.innerHeight;
+let kaWidth, kaHeight;
+
+if (wih < wiw * 0.6) {
+	kaWidth = window.innerHeight / 0.6;
+	kaHeight = window.innerHeight;
+} else {
+	kaWidth = window.innerWidth;
+	kaHeight = window.innerWidth * 0.6;
+}
+
+// KABOOM!!
+
 kaboom({
 	inspectColor: [255,255,255],
-	width: window.innerWidth,
-	height: window.innerWidth * 0.6,
+	width: kaWidth,
+	height: kaHeight,
 	letterbox: true,
-	pixelDensity: 1.2,
-	crisp: true,
+	pixelDensity: 4,
+	//crisp: true,
 	logMax: 3,
 	debugKey: 'i',
 	buttons: {
@@ -13,7 +27,7 @@ kaboom({
 		down:  { keyboard: ["s"] },
 		right: { keyboard: ["d"] },
         shoot: { keyboard: ["space"] },
-        pause: { keyboard: ["p"] },
+        pause: { keyboard: ["p", "escape"] },
     },
 });
 

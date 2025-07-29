@@ -270,7 +270,7 @@ for (let i = 0; i < pauseMenuOptions.length; i++) {
 	pauseMenu.add([
 		pos(
 			width() - UNIT*8,
-			height() - UNIT*4.5 - UNIT*(pauseMenuOptions.length - i - 1)*1.25
+			height() - UNIT*5 - UNIT*(pauseMenuOptions.length - i - 1)*1.25
 		),
 		text(pauseMenuOptions[i][0], {
 			size: UNIT*0.75,
