@@ -18,7 +18,6 @@ kaboom({
 	height: kaHeight,
 	letterbox: true,
 	pixelDensity: 1,
-	//crisp: true,
 	logMax: 3,
 	debugKey: 'i',
 	buttons: {
@@ -66,12 +65,26 @@ loadBean();
 loadSprite('placeholder', 'https://iili.io/FGY2sv2.md.png');
 loadSprite('bullet', 'https://iili.io/FqEvP2e.png');
 
+
 loadRoot('https://unpolloloco.github.io/apple-wars-2/assets/');
 
 loadSprite('grass', 'sprites/grass.png', {
 	sliceX: 3,
 	sliceY: 3,
 });
+
+loadSpriteAtlas('sprites/ui.png', {
+	'abilityMeter_full': { x: 1, y: 1, width: 150, height: 159 },
+	'abilityMeter_empty': { x: 153, y: 1, width: 150, height: 159 },
+	'abilityMeter_filling': { x: 305, y: 1, width: 150, height: 159 },
+
+	'bulletSlot_primary': { x: 457, y: 1, width: 100, height: 130 },
+	'bulletSlot_secondary': { x: 559, y: 1, width: 100, height: 130 },
+	
+	'healthBar_full': { x: 1, y: 162, width: 600, height: 100 },
+	'healthBar_empty': { x: 1, y: 264, width: 600, height: 100 },
+	'healthBar_flash': { x: 1, y: 366, width: 600, height: 100 },
+})
 
 
 loadShader(

@@ -121,9 +121,10 @@ const player = gameScene.add([
 // Ability
 
 const abilityDisplay = ui.add([
-	pos(UNIT * 0.75),
-	sprite('placeholder'),
-	scale(UNIT / 500 * 1.5),
+	pos(UNIT * 0.75, UNIT * 2.25),
+	sprite('abilityMeter_empty'),
+	anchor('botleft'),
+	scale(UNIT / 150 * 1.5),
 	fixed(),
 	z(LAYERS.ui),
 ])
@@ -131,55 +132,64 @@ const abilityDisplay = ui.add([
 // Bullet Displays
 
 const bulletDisplay = ui.add([
-	pos(abilityDisplay.pos.add(
-		UNIT * 1.75, 0
-	)),
-	sprite('placeholder'),
-	scale(UNIT / 500 * 1.15),
+	pos(UNIT*2.5, UNIT*0.75),
+	sprite('bulletSlot_primary'),
+	scale(UNIT / 100 * 1.15),
 	fixed(),
 	z(LAYERS.ui),
 ])
 
 const bulletDisplaySecondary = ui.add([
-	pos(bulletDisplay.pos.add(
-		0, UNIT * 0.75
-	)),
-	sprite('placeholder'),
-	scale(UNIT / 500 * 0.75),
+	pos(bulletDisplay.pos),
+	sprite('bulletSlot_secondary'),
+	scale(UNIT / 100 * 1.15),
 	fixed(),
 	z(LAYERS.ui - 1),
 ])
 
 // Healthbar
 
-const healthBarOutline = ui.add([
+const emptyHealthBar = ui.add([
 	pos(bulletDisplay.pos.add(
 		UNIT * 1.4, 0
 	)),
-	rect(UNIT * 6, UNIT * 0.75),
-	color(BLACK),
+	sprite('healthBar_empty'),
+	scale(UNIT / 600 * 6),
 	z(LAYERS.ui - 1),
 	fixed(),
 ])
 
-let o = 0.07 * UNIT; // offset
-let maxWidth = healthBarOutline.width - 2*o; // width
+let o = 0.03 * UNIT; // offset
+let maxWidth = UNIT*6 - 2*o; // width
+
+// Health bar FILL
 
 const healthBar = ui.add([
-	pos(healthBarOutline.pos.add(o, o)),
+	pos(emptyHealthBar.pos.add(o)),
 	rect(
 		maxWidth,
-		healthBarOutline.height - 2*o,
+		UNIT - 2*o,
 	),
 	color(rgb(200, 30, 30)),
-	z(LAYERS.ui),
+	z(LAYERS.ui + 1),
 	fixed(),
+	mask(),
 	{
 		maxWidth: maxWidth,
 	}
 ])
 
-const healthBarTransition = ui.add([
+healthBar.add([
+	pos(-o),
+	sprite('healthBar_full'),
+	scale(UNIT / 600 * 6),
+	z(LAYERS.ui + 1),
+	fixed(),
+])
+
+// Health bar FLASH
+
+const healthBarFlashMask = ui.add([
 	pos(healthBar.pos.add(
 		healthBar.width,
 		0
@@ -189,19 +199,28 @@ const healthBarTransition = ui.add([
 		healthBar.height,
 	),
 	color(WHITE),
-	z(LAYERS.ui + 1),
+	z(LAYERS.ui),
 	fixed(),
+	mask(),
 	{
 		tween:		null,
 		lastHealth: 100,
 	}
 ])
 
+const healthBarFlash = healthBarFlashMask.add([
+	pos(-o),
+	sprite('healthBar_flash'),
+	scale(UNIT / 600 * 6),
+	z(LAYERS.ui),
+	fixed(),
+])
+
 // Money counter
 
 const moneyCounter = ui.add([
 	pos(abilityDisplay.pos.add(
-		0, UNIT*1.75
+		0, UNIT*0.25
 	)),
 	text('$0', {
 		size: UNIT / 3,
@@ -528,20 +547,23 @@ function updateHealthBar() {
 	healthBar.width = healthBar.maxWidth / 100 * player.health;
 
 	// The white transition section
-	if (player.health < healthBarTransition.lastHealth) {
-		let lastPos = healthBarTransition.pos.x;
+	if (player.health < healthBarFlashMask.lastHealth) {
+		let lastPos = healthBarFlashMask.pos.x;
 
 		// Set pre-tween size and position
-		healthBarTransition.pos.x = healthBar.pos.x + Math.max(0, healthBar.width);
-		healthBarTransition.width += lastPos - healthBarTransition.pos.x;
-		
-		if (healthBarTransition.tween) healthBarTransition.tween.cancel();
+		healthBarFlashMask.pos.x = healthBar.pos.x + Math.max(0, healthBar.width);
+		healthBarFlashMask.width += lastPos - healthBarFlashMask.pos.x;
 
-		healthBarTransition.tween = gameScene.tween(
-			healthBarTransition.width,
+		// Masked visual positioning
+		healthBarFlash.pos.x = -1 * (healthBarFlashMask.pos.x - healthBar.pos.x) - o;
+		
+		if (healthBarFlashMask.tween) healthBarFlashMask.tween.cancel();
+
+		healthBarFlashMask.tween = gameScene.tween(
+			healthBarFlashMask.width,
 			0,
 			0.3,
-			(w) => {healthBarTransition.width = w},
+			(w) => {healthBarFlashMask.width = w},
 			easings.easeOutCubic
 		);
 	}
