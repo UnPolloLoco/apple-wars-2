@@ -126,6 +126,29 @@ const abilityDisplay = ui.add([
 	anchor('botleft'),
 	scale(UNIT / 150 * 1.5),
 	fixed(),
+	z(LAYERS.ui - 1),
+])
+
+const abilityFillMask = add([
+	pos(abilityDisplay.pos),
+	rect(UNIT*1.5, UNIT/2),
+	color(BLUE),
+	anchor('botleft'),
+	opacity(0.3),
+	fixed(),
+	z(LAYERS.ui),
+	mask(),
+	{
+		maxHeight: UNIT*1.58,
+	}
+])
+
+abilityFillMask.add([
+	pos(0),
+	sprite('abilityMeter_filling'),
+	anchor('botleft'),
+	scale(UNIT / 150 * 1.5),
+	fixed(),
 	z(LAYERS.ui),
 ])
 
