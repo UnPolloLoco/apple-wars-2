@@ -129,9 +129,9 @@ const abilityDisplay = ui.add([
 	z(LAYERS.ui - 1),
 ])
 
-const abilityFillMask = add([
+const abilityFillingMask = ui.add([
 	pos(abilityDisplay.pos),
-	rect(UNIT*1.5, UNIT/2),
+	rect(UNIT*1.5, 0),
 	color(BLUE),
 	anchor('botleft'),
 	opacity(0.3),
@@ -143,13 +143,25 @@ const abilityFillMask = add([
 	}
 ])
 
-abilityFillMask.add([
+// White filling
+abilityFillingMask.add([
 	pos(0),
 	sprite('abilityMeter_filling'),
 	anchor('botleft'),
 	scale(UNIT / 150 * 1.5),
 	fixed(),
 	z(LAYERS.ui),
+])
+
+// Red full icon
+const abilityFull = ui.add([
+	pos(abilityDisplay.pos),
+	sprite('abilityMeter_full'),
+	anchor('botleft'),
+	scale(UNIT / 150 * 1.5),
+	fixed(),
+	z(LAYERS.ui + 1),
+	opacity(0),
 ])
 
 // Bullet Displays
@@ -194,7 +206,7 @@ const healthBar = ui.add([
 		UNIT - 2*o,
 	),
 	color(rgb(200, 30, 30)),
-	z(LAYERS.ui + 1),
+	z(LAYERS.ui + 2),
 	fixed(),
 	mask(),
 	{
@@ -202,11 +214,11 @@ const healthBar = ui.add([
 	}
 ])
 
-healthBar.add([
+const healthBarFull = healthBar.add([
 	pos(-o),
 	sprite('healthBar_full'),
 	scale(UNIT / 600 * 6),
-	z(LAYERS.ui + 1),
+	z(LAYERS.ui + 2),
 	fixed(),
 ])
 
@@ -222,7 +234,7 @@ const healthBarFlashMask = ui.add([
 		healthBar.height,
 	),
 	color(WHITE),
-	z(LAYERS.ui),
+	z(LAYERS.ui + 1),
 	fixed(),
 	mask(),
 	{
@@ -235,8 +247,27 @@ const healthBarFlash = healthBarFlashMask.add([
 	pos(-o),
 	sprite('healthBar_flash'),
 	scale(UNIT / 600 * 6),
+	z(LAYERS.ui + 1),
+	fixed(),
+])
+
+// Health bar shadow
+
+const healthBarShadowMask = ui.add([
+	pos(healthBarFlashMask.pos),
+	rect(0, healthBar.height),
 	z(LAYERS.ui),
 	fixed(),
+	mask(),
+])
+
+const healthBarShadow = healthBarShadowMask.add([
+	pos(-o),
+	sprite('healthBar_flash'),
+	scale(UNIT / 600 * 6),
+	z(LAYERS.ui),
+	fixed(),
+	shader('healthBarShadow'),
 ])
 
 // Money counter
@@ -569,6 +600,9 @@ function borderResolve(p) {
 function updateHealthBar() {
 	healthBar.width = healthBar.maxWidth / 100 * player.health;
 
+	// Show shadow?
+	healthBarShadow.opacity = player.health > 0 ? 1 : 0;
+
 	// The white transition section
 	if (player.health < healthBarFlashMask.lastHealth) {
 		let lastPos = healthBarFlashMask.pos.x;
@@ -576,9 +610,16 @@ function updateHealthBar() {
 		// Set pre-tween size and position
 		healthBarFlashMask.pos.x = healthBar.pos.x + Math.max(0, healthBar.width);
 		healthBarFlashMask.width += lastPos - healthBarFlashMask.pos.x;
-
+		
 		// Masked visual positioning
 		healthBarFlash.pos.x = -1 * (healthBarFlashMask.pos.x - healthBar.pos.x) - o;
+		
+		// Shadow copycatting
+		
+		healthBarShadowMask.pos = healthBarFlashMask.pos;
+		healthBarShadow.pos = healthBarFlash.pos;
+
+		// Tweeeeeen
 		
 		if (healthBarFlashMask.tween) healthBarFlashMask.tween.cancel();
 
@@ -586,7 +627,10 @@ function updateHealthBar() {
 			healthBarFlashMask.width,
 			0,
 			0.3,
-			(w) => {healthBarFlashMask.width = w},
+			(w) => {
+				healthBarFlashMask.width = w;
+				healthBarShadowMask.width = w + UNIT*0.08; // size of health bar shadow (0.14 is inner layer thickness)
+			},
 			easings.easeOutCubic
 		);
 	}

@@ -109,3 +109,19 @@ loadShader(
 		}
 	}`
 );
+
+loadShader(
+	'healthBarShadow', null, `
+
+	vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
+		vec4 c = def_frag();
+		//float gray = 0.1765;
+		float gray = 0.0;
+
+		if (c.r < gray && c.g < gray && c.b < gray) {
+			return vec4(c.r, c.g, c.b, c.a);
+		} else {
+			return vec4(gray, gray, gray, c.a*0.3);
+		}
+	}`
+);
