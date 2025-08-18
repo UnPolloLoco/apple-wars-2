@@ -59,6 +59,7 @@ const CAMERA_SHIFT_MAGNITUDE = 0.1;
 const ARENA_DIMENSIONS = [8,6];
 const ARENA_TILE_SIZE = 5;
 
+// Sprite padding is one pixel on the border, and two pixels between sprites.
 
 loadBean();
 

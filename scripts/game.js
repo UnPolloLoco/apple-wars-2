@@ -16,7 +16,7 @@ const GAME_STATUS = {
 
 const gameScene =	add([ z(0), timer() ]);
 const pauseMenu =	add([ z(1), timer(), {opacityTween: null} ]);
-const ui = 			add([ z(2), timer() ]);
+const ui = 			add([ z(2), timer(), ]);
 
 const STATS = {
 	'money': 0,
@@ -118,10 +118,30 @@ const player = gameScene.add([
 // ---      UI       --- //
 // --------------------- //
 
+// Bullet Displays
+
+const bulletDisplay = ui.add([
+	pos(UNIT*0.75, UNIT*0.75),
+	sprite('bulletSlot_primary'),
+	scale(UNIT / 100 * 1.15),
+	fixed(),
+	z(LAYERS.ui),
+])
+
+const bulletDisplaySecondary = ui.add([
+	pos(bulletDisplay.pos.sub(0, UNIT*0.14)),
+	sprite('bulletSlot_secondary', { flipX: true, }),
+	scale(UNIT / 100 * 1.15),
+	fixed(),
+	z(LAYERS.ui - 1),
+])
+
 // Ability
 
 const abilityDisplay = ui.add([
-	pos(UNIT * 0.75, UNIT * 2.25),
+	pos(
+		bulletDisplay.pos.x + UNIT * 1.3, 
+		UNIT * 2.1),
 	sprite('abilityMeter_empty'),
 	anchor('botleft'),
 	scale(UNIT / 150 * 1.5),
@@ -161,32 +181,14 @@ const abilityFull = ui.add([
 	scale(UNIT / 150 * 1.5),
 	fixed(),
 	z(LAYERS.ui + 1),
-	opacity(0),
-])
-
-// Bullet Displays
-
-const bulletDisplay = ui.add([
-	pos(UNIT*2.5, UNIT*0.75),
-	sprite('bulletSlot_primary'),
-	scale(UNIT / 100 * 1.15),
-	fixed(),
-	z(LAYERS.ui),
-])
-
-const bulletDisplaySecondary = ui.add([
-	pos(bulletDisplay.pos),
-	sprite('bulletSlot_secondary'),
-	scale(UNIT / 100 * 1.15),
-	fixed(),
-	z(LAYERS.ui - 1),
+	opacity(1),
 ])
 
 // Healthbar
 
 const emptyHealthBar = ui.add([
-	pos(bulletDisplay.pos.add(
-		UNIT * 1.4, 0
+	pos(abilityDisplay.pos.add(
+		UNIT * 1.66, UNIT * -1.35
 	)),
 	sprite('healthBar_empty'),
 	scale(UNIT / 600 * 6),
@@ -273,8 +275,8 @@ const healthBarShadow = healthBarShadowMask.add([
 // Money counter
 
 const moneyCounter = ui.add([
-	pos(abilityDisplay.pos.add(
-		0, UNIT*0.25
+	pos(bulletDisplay.pos.add(
+		0, UNIT*1.75
 	)),
 	text('$0', {
 		size: UNIT / 3,
