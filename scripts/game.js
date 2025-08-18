@@ -123,15 +123,18 @@ const player = gameScene.add([
 const bulletDisplay = ui.add([
 	pos(UNIT*0.75, UNIT*0.75),
 	sprite('bulletSlot_primary'),
-	scale(UNIT / 100 * 1.15),
+	scale(UNIT / 115 * 1.15),
 	fixed(),
 	z(LAYERS.ui),
 ])
 
 const bulletDisplaySecondary = ui.add([
-	pos(bulletDisplay.pos.sub(0, UNIT*0.14)),
-	sprite('bulletSlot_secondary', { flipX: true, }),
-	scale(UNIT / 100 * 1.15),
+	pos(bulletDisplay.pos.add(
+		UNIT * 0.4, 
+		UNIT * 0.6, 
+	)),
+	sprite('bulletSlot_secondary'),
+	scale(UNIT / 75 * 0.75),
 	fixed(),
 	z(LAYERS.ui - 1),
 ])

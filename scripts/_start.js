@@ -67,6 +67,20 @@ loadSprite('placeholder', 'https://iili.io/FGY2sv2.md.png');
 loadSprite('bullet', 'https://iili.io/FqEvP2e.png');
 
 
+//loadSpriteAtlas('sprites/ui.png', {
+loadSpriteAtlas('https://iili.io/FmQquPR.png', {
+	'abilityMeter_full': { x: 1, y: 1, width: 150, height: 159 },
+	'abilityMeter_empty': { x: 153, y: 1, width: 150, height: 159 },
+	'abilityMeter_filling': { x: 305, y: 1, width: 150, height: 159 },
+	
+	'healthBar_full': { x: 1, y: 162, width: 600, height: 100 },
+	'healthBar_empty': { x: 1, y: 264, width: 600, height: 100 },
+	'healthBar_flash': { x: 1, y: 366, width: 600, height: 100 },
+	
+	'bulletSlot_primary': { x: 1, y: 468, width: 115, height: 115 },
+	'bulletSlot_transition': { x: 118, y: 468, width: 95, height: 95 },
+	'bulletSlot_secondary': { x: 215, y: 468, width: 75, height: 75 },
+})
 loadRoot('https://unpolloloco.github.io/apple-wars-2/assets/');
 
 loadSprite('grass', 'sprites/grass.png', {
@@ -74,18 +88,6 @@ loadSprite('grass', 'sprites/grass.png', {
 	sliceY: 3,
 });
 
-loadSpriteAtlas('sprites/ui.png', {
-	'abilityMeter_full': { x: 1, y: 1, width: 150, height: 159 },
-	'abilityMeter_empty': { x: 153, y: 1, width: 150, height: 159 },
-	'abilityMeter_filling': { x: 305, y: 1, width: 150, height: 159 },
-
-	'bulletSlot_primary': { x: 457, y: 1, width: 100, height: 130 },
-	'bulletSlot_secondary': { x: 559, y: 1, width: 100, height: 130 },
-	
-	'healthBar_full': { x: 1, y: 162, width: 600, height: 100 },
-	'healthBar_empty': { x: 1, y: 264, width: 600, height: 100 },
-	'healthBar_flash': { x: 1, y: 366, width: 600, height: 100 },
-})
 
 
 loadShader(
