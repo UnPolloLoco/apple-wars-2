@@ -90,12 +90,12 @@ for (let x = 0; x < arenaWidth; x++) {
 // Summon player
 
 const player = gameScene.add([
-	sprite('bean'),
+	sprite('apple_base'),
 	pos(0,0),
-	scale(UNIT/61 * 0.85),
+	scale(UNIT/85 * 0.85),
 	anchor('center'),
 	rotate(0),
-	z(LAYERS.players + 1),
+	z(LAYERS.players),
 	offscreen({ distance: UNIT * OFFSCREEN_DISTANCE }),
 	color(RED),
 	"character",
@@ -106,6 +106,7 @@ const player = gameScene.add([
 		movementVec:	vec2(0,0),
 		knockbackVec:	vec2(0,0),
 		lastHitTime:	-10,
+		prevAngle:		0,
 		poison: {
 			damage:				0,
 			nextTick:			0,
@@ -113,6 +114,36 @@ const player = gameScene.add([
 		},
 	}
 ])
+
+const playerGlisten = player.add([
+	sprite('apple_glisten'),
+	pos(0,0),
+	anchor('center'),
+	z(LAYERS.players + 1),
+])
+
+const playerEyes = player.add([
+	sprite('apple_eyes', { frame: 2 }),
+	pos(0,0),
+	anchor('top'),
+	z(LAYERS.players + 2),
+	{
+		nextBlink: 5,
+	}
+])
+
+const playerLeaf = player.add([
+	sprite('apple_leaf'),
+	pos(0, -UNIT/30),
+	anchor(vec2(0, 0.79)), // stem position
+	area(),
+	rotate(20),
+	z(LAYERS.players + 3),
+	{
+		targetRotation: 0,
+	}
+])
+
 
 // --------------------- //
 // ---      UI       --- //
@@ -381,15 +412,21 @@ function gameTime() {
 // Decay by time
 
 function decay(start, end, speed) {
-	return (
-		start.sub(
-			end
-		).scale(
-			2 ** -(speed * dt())
-		).add(
-			end
-		)
-	);
+	if (start.x != undefined) {
+		return (
+			start.sub(
+				end
+			).scale(
+				2 ** -(speed * dt())
+			).add(
+				end
+			)
+		);
+	} else {
+		return (
+			(start - end) * (2 ** -(speed * dt())) + end
+		);
+	}
 }
 
 // Enemy waves
@@ -442,7 +479,7 @@ function summonEnemy(data) {
 			anchor('center'),
 			rotate(0),
 			offscreen({ distance: UNIT * OFFSCREEN_DISTANCE }),
-			z(LAYERS.players),
+			z(LAYERS.players - 5),
 			"character",
 			"enemy",
 			{
@@ -485,7 +522,7 @@ function attack(data) {
 			rotate(bAngle),
 			move(bAngle+90, UNIT*bInfo.speed),
 			anchor('center'),
-			z(LAYERS.players - 1),
+			z(LAYERS.players - 6),
 			timer(),
 			"bullet",
 			{
@@ -647,6 +684,46 @@ function updateMoneyCounter() {
 	moneyCounter.text = `\$${Math.floor(STATS.money)}`;
 }
 
+// Player glisten effect
+
+function updatePlayerGlisten() {
+	playerGlisten.angle = -player.angle;
+
+	let a = -player.angle / 360;
+	playerGlisten.frame = Math.floor(5 * (
+		a - Math.floor(a)
+	));
+}
+
+// Player leaf rotation
+
+function updatePlayerLeaf() {
+	let a = player.angle;
+	let pa = player.prevAngle;
+
+	if (Math.abs(a - pa) > 180) {
+		if (a > pa) { pa += 360; } 
+		else { pa -= 360; }
+	}
+
+	let diff = a - pa;
+
+	let start = 20;
+	let end = 60;
+	let topSpeed = 5;
+	
+	let newTarget = clamp(
+		map(
+			Math.abs(diff),
+			0, topSpeed, start, end
+		),
+		start, end
+	);
+	newTarget *= -Math.sign(diff);
+
+	playerLeaf.targetRotation = newTarget;
+}
+
 
 
 // ---------------------------- //
@@ -684,7 +761,11 @@ gameScene.onButtonPress('shoot', () => {
 // Change player angle 
 
 gameScene.onMouseMove(() => {
+	player.prevAngle = player.angle;
+
 	player.angle = toWorld(mousePos()).angle(player.pos) - 90;
+	updatePlayerGlisten();
+	updatePlayerLeaf();
 })
 
 
@@ -713,6 +794,14 @@ gameScene.loop(0.2, () => {
 	GAME_STATUS.CHAR_ONSCREEN = on;
 	GAME_STATUS.CHAR_OFFSCREEN = off;
 
+	// Do player blink
+
+	if (playerEyes.nextBlink < gameTime()) {
+		playerEyes.play('blink');
+		playerEyes.nextBlink = gameTime() + rand(4,8);
+
+		if (player.health <= 33) playerEyes.nextBlink += 2.5;
+	}
 })
 
 // ---------------------------- //
@@ -828,6 +917,10 @@ gameScene.onUpdate(() => {
 
 	player.pos = borderResolve(player.pos);
 
+	// Player visual effects
+
+	playerLeaf.angle = decay(playerLeaf.angle, playerLeaf.targetRotation, 10);
+
 
 	// Bullet collision
 
@@ -920,7 +1013,6 @@ gameScene.onUpdate(() => {
 
 	//debug.log(`${totaldmg}d -- ${totalPsn}p -- $${STATS.money}`)
 
-	if (isKeyDown('z')) setCamScale(0.4);
+	if (isKeyDown('z')) setCamScale(4); //setCamScale(0.4);
 	if (isKeyDown('x')) { summonEnemy({type: 'basic', count: 5}); };
-
 })

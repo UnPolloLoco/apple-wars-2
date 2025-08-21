@@ -66,9 +66,9 @@ loadBean();
 loadSprite('placeholder', 'https://iili.io/FGY2sv2.md.png');
 loadSprite('bullet', 'https://iili.io/FqEvP2e.png');
 
+loadRoot('https://unpolloloco.github.io/apple-wars-2/assets/');
 
-//loadSpriteAtlas('sprites/ui.png', {
-loadSpriteAtlas('https://iili.io/FmQquPR.png', {
+loadSpriteAtlas('sprites/ui.png', {
 	'abilityMeter_full': { x: 1, y: 1, width: 150, height: 159 },
 	'abilityMeter_empty': { x: 153, y: 1, width: 150, height: 159 },
 	'abilityMeter_filling': { x: 305, y: 1, width: 150, height: 159 },
@@ -81,7 +81,17 @@ loadSpriteAtlas('https://iili.io/FmQquPR.png', {
 	'bulletSlot_transition': { x: 118, y: 468, width: 95, height: 95 },
 	'bulletSlot_secondary': { x: 215, y: 468, width: 75, height: 75 },
 })
-loadRoot('https://unpolloloco.github.io/apple-wars-2/assets/');
+
+loadSpriteAtlas('sprites/apple.png', {
+	'apple_base': { x: 1, y: 1, width: 85, height: 85 },
+	'apple_leaf': { x: 88, y: 1, width: 30, height: 51 },
+
+	'apple_eyes': { x: 120, y: 1, width: 170, height: 86, sliceX: 2, sliceY: 2,
+		anims: { blink: { frames: [0, 1, 2], speed: 25 } },
+	},
+	
+	'apple_glisten': { x: 1, y: 89, width: 320, height: 64, sliceX: 5 },
+})
 
 loadSprite('grass', 'sprites/grass.png', {
 	sliceX: 3,
