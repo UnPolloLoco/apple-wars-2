@@ -1,6 +1,5 @@
 /*
 	name:		pretty title
-
 	damage:		damage
 	speed:		UNITS / sec
 	size:		sprite width (px)
@@ -10,7 +9,7 @@
 		spread:		volley spread (use with count)
 		poison:		damage / sec (repeated 3 times)
 */
-
+		
 const BULLETS = {
 	appleSeed: {
 		name: 'Apple Seed',
@@ -40,7 +39,7 @@ const BULLETS = {
 		special: {
 			poison: 2, // 20
 		}
-	}
+	},
 }
 
 /*

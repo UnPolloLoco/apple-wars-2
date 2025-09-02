@@ -529,6 +529,7 @@ function attack(data) {
 				source:      s,
 				info:        bInfo,
 				isFromEnemy: s.is('enemy'),
+				hasHit:      [],
 			}
 		])
 	
@@ -571,7 +572,10 @@ function damageFlash(victim, flashType) {
 // Bullet collide function
 
 function bulletCollision(b, c) {
-	if (c.is('enemy') != b.isFromEnemy) {
+	if (c.is('enemy') != b.isFromEnemy && !b.hasHit.includes(c.id)) {
+		// The axe remembers!?
+		b.hasHit.push(c.id);
+
 		// Set victim knockback
 		c.knockbackVec = Vec2.fromAngle(b.angle + 90).scale(UNIT * 5);
 		c.lastHitTime = gameTime();
@@ -754,7 +758,7 @@ gameScene.onMousePress(() => {
 gameScene.onButtonPress('shoot', () => {
 	if (gameTime() > player.nextShootTime) attack({
 		source: player,
-		type:   'cherryPit',
+		type:   'strawberrySeed',
 	});
 })
 
@@ -937,7 +941,7 @@ gameScene.onUpdate(() => {
 			let radius = b.info.scale/2 + 0.4;
 			radius *= UNIT;
 
-			if (b.pos.sdist(v.pos) < radius * radius) {
+			if (b.pos.sdist(v.pos) < radius * radius && !b.hasHit.includes(v.id)) {
 				bulletCollision(b, v);
 				break;
 			}
@@ -1013,6 +1017,6 @@ gameScene.onUpdate(() => {
 
 	//debug.log(`${totaldmg}d -- ${totalPsn}p -- $${STATS.money}`)
 
-	if (isKeyDown('z')) setCamScale(4); //setCamScale(0.4);
+	if (isKeyDown('z')) setCamScale(0.4);
 	if (isKeyDown('x')) { summonEnemy({type: 'basic', count: 5}); };
 })
