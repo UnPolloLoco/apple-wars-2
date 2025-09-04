@@ -8,6 +8,8 @@
 		count:		seeds per shot
 		spread:		volley spread (use with count)
 		poison:		damage / sec (repeated 3 times)
+		superKb:	powerful momentum? (use with pierce)
+		pierce:		amount of enemies it can hit
 */
 		
 const BULLETS = {
@@ -38,6 +40,27 @@ const BULLETS = {
 		scale:	0.3,
 		special: {
 			poison: 2, // 20
+		}
+	},
+	test1: {
+		name: 'Knockback',
+		damage:	15,
+		speed:	12,
+		size:	27,
+		scale:	0.35,
+		special: {
+			superKb: true,
+			pierce: 5,
+		}
+	},
+	test2: {
+		name: 'Pierce',
+		damage:	10,
+		speed:	10,
+		size:	27,
+		scale:	0.28,
+		special: {
+			pierce: 3,
 		}
 	},
 }

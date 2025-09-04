@@ -509,9 +509,13 @@ function attack(data) {
 
 	let bulletCount = 1;
 	if (bInfo.special.count) bulletCount = bInfo.special.count;
-	let relativeSpread = Math.floor(bulletCount / 2);
 
+	let pierceCount = 1;
+	if (bInfo.special.pierce) pierceCount = bInfo.special.pierce;
+
+	
 	for (let n = 0; n < bulletCount; n++) {
+		let relativeSpread = Math.floor(bulletCount / 2);
 		let bAngle = s.angle += rand(-BULLET_SPREAD, BULLET_SPREAD);
 		if (bInfo.special.count) bAngle += (n - relativeSpread) * bInfo.special.spread / relativeSpread / 2;
 
@@ -530,6 +534,7 @@ function attack(data) {
 				info:        bInfo,
 				isFromEnemy: s.is('enemy'),
 				hasHit:      [],
+				pierce:      pierceCount,
 			}
 		])
 	
@@ -575,6 +580,7 @@ function bulletCollision(b, c) {
 	if (c.is('enemy') != b.isFromEnemy && !b.hasHit.includes(c.id)) {
 		// The axe remembers!?
 		b.hasHit.push(c.id);
+		b.pierce -= 1;
 
 		// Set victim knockback
 		c.knockbackVec = Vec2.fromAngle(b.angle + 90).scale(UNIT * 5);
@@ -604,7 +610,7 @@ function bulletCollision(b, c) {
 		}
 		
 		// 'Damage' bullet
-		destroy(b);
+		if (b.pierce <= 0) destroy(b);
 	}
 }
 
@@ -758,7 +764,7 @@ gameScene.onMousePress(() => {
 gameScene.onButtonPress('shoot', () => {
 	if (gameTime() > player.nextShootTime) attack({
 		source: player,
-		type:   'strawberrySeed',
+		type:   'test2',
 	});
 })
 
