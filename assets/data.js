@@ -47,7 +47,7 @@ const BULLETS = {
 		damage:	15,
 		speed:	12,
 		size:	27,
-		scale:	0.35,
+		scale:	0.36,
 		special: {
 			superKb: true,
 			pierce: 5,

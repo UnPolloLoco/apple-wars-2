@@ -103,7 +103,7 @@ const player = gameScene.add([
 	{
 		nextShootTime:	0,
 		health:			100,
-		movementVec:	vec2(0,0),
+		moveVec:	vec2(0,0),
 		knockbackVec:	vec2(0,0),
 		lastHitTime:	-10,
 		prevAngle:		0,
@@ -524,7 +524,6 @@ function attack(data) {
 			pos(s.pos),
 			scale(UNIT / bInfo.size * bInfo.scale),
 			rotate(bAngle),
-			move(bAngle+90, UNIT*bInfo.speed),
 			anchor('center'),
 			z(LAYERS.players - 6),
 			timer(),
@@ -532,6 +531,7 @@ function attack(data) {
 			{
 				source:      s,
 				info:        bInfo,
+				moveVec:     Vec2.fromAngle(bAngle + 90).scale(UNIT * bInfo.speed),
 				isFromEnemy: s.is('enemy'),
 				hasHit:      [],
 				pierce:      pierceCount,
@@ -764,7 +764,7 @@ gameScene.onMousePress(() => {
 gameScene.onButtonPress('shoot', () => {
 	if (gameTime() > player.nextShootTime) attack({
 		source: player,
-		type:   'test2',
+		type:   'test1',
 	});
 })
 
@@ -830,14 +830,14 @@ gameScene.onUpdate(() => {
 
 		if (c.info.aimSkill == 1) {
 			target = target.add(
-				player.movementVec.scale(
+				player.moveVec.scale(
 					UNIT * PLAYER_SPEED * 2 / BULLETS.appleSeed.speed
 				)
 			);
 		}
 		if (c.info.aimSkill == 2) {
 			target = target.add(
-				player.movementVec.scale(
+				player.moveVec.scale(
 					Math.sqrt(distanceToPlayer) * PLAYER_SPEED / BULLETS.appleSeed.speed
 				)
 			);
@@ -877,20 +877,20 @@ gameScene.onUpdate(() => {
 	let s = isButtonDown('down');
 	let d = isButtonDown('right');
 	
-	let newMovementVec = vec2(0,0);
+	let newMoveVec = vec2(0,0);
 	
 	if (w || a || s || d) {
-		if (w) newMovementVec = newMovementVec.add(0, -1);
-		if (a) newMovementVec = newMovementVec.add(-1, 0);
-		if (s) newMovementVec = newMovementVec.add(0, 1);
-		if (d) newMovementVec = newMovementVec.add(1, 0);
+		if (w) newMoveVec = newMoveVec.add(0, -1);
+		if (a) newMoveVec = newMoveVec.add(-1, 0);
+		if (s) newMoveVec = newMoveVec.add(0, 1);
+		if (d) newMoveVec = newMoveVec.add(1, 0);
 	}
 	
 	// Player movement
 	
-	player.movementVec = newMovementVec.unit();
+	player.moveVec = newMoveVec.unit();
 	player.pos = player.pos.add(
-		player.movementVec.scale(
+		player.moveVec.scale(
 			UNIT * dt() * PLAYER_SPEED
 		)
 	);
@@ -931,10 +931,14 @@ gameScene.onUpdate(() => {
 
 	playerLeaf.angle = decay(playerLeaf.angle, playerLeaf.targetRotation, 10);
 
-
-	// Bullet collision
-
+	
 	gameScene.get('bullet').forEach((b) => {
+		
+		// Bullet movement
+
+		b.pos = b.pos.add(b.moveVec.scale(dt()));
+
+		// Bullet collision
 		let victims;
 		
 		victims = gameScene.get(
