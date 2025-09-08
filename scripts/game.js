@@ -667,6 +667,29 @@ function processKnockback(c) {
 		c.pos = c.pos.add(c.knockbackVec.scale(dt()));
 	}
 	c.knockbackVec = decay(c.knockbackVec, vec2(0,0), KB_DECAY_RATE);
+
+	// Super Knockback effects
+
+	if (c.is('superKb_victim')) {
+		let skbInfo = c.superKbInfo;
+
+		let multi = 1 - easings.easeInQuad(Math.min(1, 2*(gameTime() - skbInfo.hitTime)));
+		c.pos = c.pos.add(skbInfo.maxSpeed.scale(dt() * multi));
+
+		if (gameTime() - skbInfo.hitTime > SUPER_KB_DURATION) {
+			c.untag('superKb_victim');
+			c.untag('superKb_entangler');
+			c.superKbInfo = null;
+		}
+
+		if (c.is('superKb_entangler')) {
+			let entangledBullet = c.superKbInfo.entangle;
+			entangledBullet.pos = c.pos.add(
+				Vec2.fromAngle(entangledBullet.superKbInfo.entangleAngle)
+				.scale(UNIT/2)
+			);
+		}
+	}
 }
 
 // Border wall
@@ -1026,29 +1049,6 @@ gameScene.onUpdate(() => {
 				c.untag('poisoned');
 			}
 
-		}
-	})
-
-	// Super Knockback effects
-
-	gameScene.get('superKb_victim').forEach((c) => {
-		let skbInfo = c.superKbInfo;
-
-		let multi = 1 - easings.easeInQuad(Math.min(1, 2*(gameTime() - skbInfo.hitTime)));
-		c.pos = c.pos.add(skbInfo.maxSpeed.scale(dt() * multi));
-
-		if (gameTime() - skbInfo.hitTime > SUPER_KB_DURATION) {
-			c.untag('superKb_victim');
-			c.untag('superKb_entangler');
-			c.superKbInfo = null;
-		}
-
-		if (c.is('superKb_entangler')) {
-			let entangledBullet = c.superKbInfo.entangle;
-			entangledBullet.pos = c.pos.add(
-				Vec2.fromAngle(entangledBullet.superKbInfo.entangleAngle)
-				.scale(UNIT/2)
-			);
 		}
 	})
 
