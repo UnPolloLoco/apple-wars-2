@@ -535,10 +535,11 @@ function attack(data) {
 				isFromEnemy: s.is('enemy'),
 				hasHit:      [],
 				pierce:      pierceCount,
+				lifeTimer:   null
 			}
 		])
 	
-		bullet.wait(2.5, () => { destroy(bullet); });
+		bullet.lifeTimer = bullet.wait(2.5, () => { destroy(bullet); });
 	}
 
 	if (s.is('enemy')) {
@@ -551,6 +552,10 @@ function attack(data) {
 // Death 
 
 function death(victim) {
+	if (victim.is('superKb_entangler')) {
+		destroy(victim.superKbInfo.entangle)
+	}
+
 	if (victim == player) {
 		debug.log('DEAD!')
 	} else {
@@ -581,15 +586,16 @@ function bulletCollision(b, c) {
 		// The axe remembers!?
 		b.hasHit.push(c.id);
 		b.pierce -= 1;
-
-		// Set victim knockback
-		c.knockbackVec = Vec2.fromAngle(b.angle + 90).scale(UNIT * 5);
-		c.lastHitTime = gameTime();
-
+		
 		// Damage victim
 		if (c != player) totaldmg += Math.min(c.health, b.info.damage); // deleteme 
 		c.health -= b.info.damage;
 		if (c == player) updateHealthBar();
+
+		c.lastHitTime = gameTime();
+
+		// Super KB speed reduction
+		if (b.info.special.superKb) b.moveVec = b.moveVec.scale(SUPER_KB_IMPACT_SPEED_MULTI);
 
 		if (c.health <= 0) {
 			// Death
@@ -606,6 +612,44 @@ function bulletCollision(b, c) {
 					ticksRemaining: POISON_TICK_COUNT,
 				};
 				c.tag('poisoned');
+			}
+
+			// Super knockback
+
+			if (b.info.special.superKb) {
+				// Set SUPER knockback
+				c.tag('superKb_victim')
+	
+				if (b.superKbInfo) {
+					// Already hit someone with super kb
+					c.superKbInfo = {
+						entangle: 	null,
+						maxSpeed:	b.moveVec,
+						hitTime:	gameTime(),
+					}
+				} else {
+					// First super kb hit
+					b.superKbInfo = {
+						entangle: 		c,
+						entangleAngle:	c.pos.angleBetween(b.pos),
+						firstHitTime:	gameTime(),
+					}
+					b.tag('superKb_bullet');
+					b.lifeTimer.cancel();
+					b.lifeTimer = b.wait(SUPER_KB_DURATION, () => { 
+						destroy(b); 
+					});
+	
+					c.superKbInfo = {
+						entangle: 	b,
+						maxSpeed:	b.moveVec,
+						hitTime:	gameTime(),
+					}
+					c.tag('superKb_entangler');
+				}
+			} else {
+				// Set normal knockback
+				c.knockbackVec = Vec2.fromAngle(b.angle + 90).scale(UNIT * 5);
 			}
 		}
 		
@@ -850,7 +894,7 @@ gameScene.onUpdate(() => {
 
 		// Enemy movement
 
-		if (distanceToPlayer > (UNIT * c.approachDistance)**2) {
+		if (!c.is('superKb_victim') && distanceToPlayer > (UNIT * c.approachDistance)**2) {
 			c.pos = c.pos.add(
 				Vec2.fromAngle(angle + 90)
 				.scale(UNIT * c.info.speed * dt())
@@ -982,6 +1026,29 @@ gameScene.onUpdate(() => {
 				c.untag('poisoned');
 			}
 
+		}
+	})
+
+	// Super Knockback effects
+
+	gameScene.get('superKb_victim').forEach((c) => {
+		let skbInfo = c.superKbInfo;
+
+		let multi = 1 - easings.easeInQuad(Math.min(1, 2*(gameTime() - skbInfo.hitTime)));
+		c.pos = c.pos.add(skbInfo.maxSpeed.scale(dt() * multi));
+
+		if (gameTime() - skbInfo.hitTime > SUPER_KB_DURATION) {
+			c.untag('superKb_victim');
+			c.untag('superKb_entangler');
+			c.superKbInfo = null;
+		}
+
+		if (c.is('superKb_entangler')) {
+			let entangledBullet = c.superKbInfo.entangle;
+			entangledBullet.pos = c.pos.add(
+				Vec2.fromAngle(entangledBullet.superKbInfo.entangleAngle)
+				.scale(UNIT/2)
+			);
 		}
 	})
 
