@@ -535,7 +535,8 @@ function attack(data) {
 				isFromEnemy: s.is('enemy'),
 				hasHit:      [],
 				pierce:      pierceCount,
-				lifeTimer:   null
+				lifeTimer:   null,
+				lastPos:     s.pos,
 			}
 		])
 	
@@ -631,7 +632,7 @@ function bulletCollision(b, c) {
 					// First super kb hit
 					b.superKbInfo = {
 						entangle: 		c,
-						entangleAngle:	c.pos.angleBetween(b.pos),
+						entangleOffset:	b.lastPos.sub(c.pos).unit().scale(UNIT * c.info.scale / 2),
 						firstHitTime:	gameTime(),
 					}
 					b.tag('superKb_bullet');
@@ -685,8 +686,7 @@ function processKnockback(c) {
 		if (c.is('superKb_entangler')) {
 			let entangledBullet = c.superKbInfo.entangle;
 			entangledBullet.pos = c.pos.add(
-				Vec2.fromAngle(entangledBullet.superKbInfo.entangleAngle)
-				.scale(UNIT/2)
+				entangledBullet.superKbInfo.entangleOffset
 			);
 		}
 	}
@@ -1003,6 +1003,7 @@ gameScene.onUpdate(() => {
 		
 		// Bullet movement
 
+		b.lastPos = b.pos;
 		b.pos = b.pos.add(b.moveVec.scale(dt()));
 
 		// Bullet collision
@@ -1095,5 +1096,6 @@ gameScene.onUpdate(() => {
 	//debug.log(`${totaldmg}d -- ${totalPsn}p -- $${STATS.money}`)
 
 	if (isKeyDown('z')) setCamScale(0.4);
-	if (isKeyDown('x')) { summonEnemy({type: 'basic', count: 5}); };
+	//if (isKeyDown('x')) { summonEnemy({type: 'basic', count: 5}); };
+	if (isKeyDown('x')) { summonEnemy({type: 'test', count: 5}); };
 })

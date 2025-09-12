@@ -103,4 +103,13 @@ const ENEMIES = {
 		aimSkill:	1,
 		kbMulti:	1.2,
 	},
+	test: {
+		seeds:		['appleSeed'],
+		speed:		0,
+		health:		10000000,
+		size:		61,
+		scale:		0.85,
+		aimSkill:	0,
+		kbMulti:	1,
+	},
 }
