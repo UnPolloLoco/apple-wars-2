@@ -136,7 +136,6 @@ const playerLeaf = player.add([
 	sprite('apple_leaf'),
 	pos(0, -UNIT/30),
 	anchor(vec2(0, 0.79)), // stem position
-	area(),
 	rotate(20),
 	z(LAYERS.players + 3),
 	{
@@ -683,7 +682,7 @@ function processKnockback(c) {
 			c.superKbInfo = null;
 		}
 
-		if (c.is('superKb_entangler')) {
+		if (c.is('superKb_entangler') && c.superKbInfo.entangle) {
 			let entangledBullet = c.superKbInfo.entangle;
 			entangledBullet.pos = c.pos.add(
 				entangledBullet.superKbInfo.entangleOffset
@@ -1023,6 +1022,15 @@ gameScene.onUpdate(() => {
 				bulletCollision(b, v);
 				break;
 			}
+
+			if (b.superKbInfo) {
+				let hitboxExtender = b.superKbInfo.entangle;
+				let radius2 = hitboxExtender.info.scale/2 + v.info.scale/2;
+				if (b.pos.sdist(hitboxExtender.pos) < radius2 * radius2 && !b.hasHit.includes(v.id)) {
+					bulletCollision(b, v);
+					break;
+				}
+			}
 		}
 	})
 
@@ -1096,6 +1104,6 @@ gameScene.onUpdate(() => {
 	//debug.log(`${totaldmg}d -- ${totalPsn}p -- $${STATS.money}`)
 
 	if (isKeyDown('z')) setCamScale(0.4);
-	//if (isKeyDown('x')) { summonEnemy({type: 'basic', count: 5}); };
-	if (isKeyDown('x')) { summonEnemy({type: 'test', count: 5}); };
+	if (isKeyDown('x')) { summonEnemy({type: 'basic', count: 5}); };
+	//if (isKeyDown('x')) { summonEnemy({type: 'test', count: 5}); };
 })

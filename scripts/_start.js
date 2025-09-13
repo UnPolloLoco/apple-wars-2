@@ -43,7 +43,7 @@ const POISON_TICK_COUNT = 10;
 const POISON_TICK_INTERVAL = 0.333;
 
 const SUPER_KB_DURATION = 0.6;
-const SUPER_KB_IMPACT_SPEED_MULTI = 0.7;
+const SUPER_KB_IMPACT_SPEED_MULTI = 0.8;
 
 const DAMAGE_FLASH = { r:1, g:1, b:1, strength:0.65 };
 const POISON_FLASH = { r:0.6, g:0.3, b:1, strength:0.85 };

@@ -50,7 +50,7 @@ const BULLETS = {
 		scale:	0.36,
 		special: {
 			superKb: true,
-			pierce: 5,
+			pierce: 8,
 		}
 	},
 	test2: {
