@@ -545,7 +545,7 @@ function attack(data) {
 	if (s.is('enemy')) {
 		s.nextShootTime = gameTime() + 0.8;
 	} else {
-		s.nextShootTime = gameTime() + 0.1;
+		s.nextShootTime = gameTime() + bInfo.delay;
 	}
 }
 
