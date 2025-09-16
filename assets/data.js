@@ -4,6 +4,7 @@
 	speed:		UNITS / sec
 	size:		sprite width (px)
 	scale:		in game width (UNITS)
+	delay:		time between manual shots (sec)
 	special:
 		count:		seeds per shot
 		spread:		volley spread (use with count)
@@ -19,6 +20,7 @@ const BULLETS = {
 		speed:	10,
 		size:	27,
 		scale:	0.28,
+		delay:	0.1,
 		special: {}
 	},
 	strawberrySeed: {
@@ -27,6 +29,7 @@ const BULLETS = {
 		speed:	12,
 		size:	27,
 		scale:	0.2,
+		delay:	0.1,
 		special: {
 			count:  3,
 			spread: 20,
@@ -38,6 +41,7 @@ const BULLETS = {
 		speed:	10,
 		size:	27,
 		scale:	0.3,
+		delay:	0.2,
 		special: {
 			poison: 2, // 20
 		}
@@ -48,6 +52,7 @@ const BULLETS = {
 		speed:	12,
 		size:	27,
 		scale:	0.36,
+		delay:	0.2,
 		special: {
 			superKb: true,
 			pierce: 8,
@@ -59,6 +64,7 @@ const BULLETS = {
 		speed:	10,
 		size:	27,
 		scale:	0.28,
+		delay:	0.2,
 		special: {
 			pierce: 3,
 		}

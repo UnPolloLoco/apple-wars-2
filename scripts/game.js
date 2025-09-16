@@ -782,7 +782,7 @@ function updatePlayerLeaf() {
 		else { pa -= 360; }
 	}
 
-	let diff = a - pa;
+	let diff = a - pa
 
 	let start = 20;
 	let end = 60;
@@ -823,14 +823,14 @@ onButtonPress('pause', () => {
 
 })
 
-gameScene.onMousePress(() => {
+gameScene.onMouseDown(() => {
 	pressButton('shoot');
 })
 
 gameScene.onButtonPress('shoot', () => {
 	if (gameTime() > player.nextShootTime) attack({
 		source: player,
-		type:   'test1',
+		type:   'strawberrySeed',
 	});
 })
 
