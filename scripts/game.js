@@ -370,7 +370,7 @@ pauseMenu.add([
 
 let pauseMenuOptions = [
 	['Resume', () => { pressButton('pause') }],
-	['Settings', () => { pressButton('pause') }],
+	['Settings', () => { alert('settings') }],
 	['Quit', () => { alert('quit') }],
 ]
 
@@ -545,7 +545,7 @@ function attack(data) {
 	if (s.is('enemy')) {
 		s.nextShootTime = gameTime() + 0.8;
 	} else {
-		s.nextShootTime = gameTime() + bInfo.delay;
+		s.nextShootTime = gameTime() + bInfo.delay * 2;
 	}
 }
 
@@ -830,7 +830,7 @@ gameScene.onMouseDown(() => {
 gameScene.onButtonPress('shoot', () => {
 	if (gameTime() > player.nextShootTime) attack({
 		source: player,
-		type:   'strawberrySeed',
+		type:   'appleSeed',
 	});
 })
 
