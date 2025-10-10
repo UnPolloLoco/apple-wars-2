@@ -12,6 +12,11 @@ const GAME_STATUS = {
 	CHAR_OFFSCREEN: 0,
 	CHAR_ONSCREEN: 0,
 	GAME_TIME: 0,
+	STATUS: {
+		LOCATION: 'level1',
+		STATE: 'normal',
+	},
+	FREEZE_FRAME_UNTIL: 0,
 }
 
 const gameScene =	add([ z(0), timer() ]);
@@ -103,7 +108,7 @@ const player = gameScene.add([
 	{
 		nextShootTime:	0,
 		health:			100,
-		moveVec:	vec2(0,0),
+		moveVec:		vec2(0,0),
 		knockbackVec:	vec2(0,0),
 		lastHitTime:	-10,
 		prevAngle:		0,
@@ -428,6 +433,19 @@ function decay(start, end, speed) {
 	}
 }
 
+// Freeze frame
+
+function setFreezeFrame(duration) {
+	let newTime = time() + duration;
+
+	if (newTime > GAME_STATUS.FREEZE_FRAME_UNTIL) {
+		GAME_STATUS.FREEZE_FRAME_UNTIL = newTime;
+	}
+}
+function isFreezeFrame() {
+	return time() < GAME_STATUS.FREEZE_FRAME_UNTIL;
+}
+
 // Enemy waves
 
 function summonEnemyWave() {
@@ -564,6 +582,7 @@ function death(victim) {
 			updateMoneyCounter();
 		}
 		destroy(victim);
+		//setFreezeFrame(0.1);
 	}
 }
 
@@ -824,11 +843,11 @@ onButtonPress('pause', () => {
 })
 
 gameScene.onMouseDown(() => {
-	pressButton('shoot');
+	if (!isFreezeFrame()) pressButton('shoot');
 })
 
 gameScene.onButtonPress('shoot', () => {
-	if (gameTime() > player.nextShootTime) attack({
+	if (!isFreezeFrame() && gameTime() > player.nextShootTime) attack({
 		source: player,
 		type:   'appleSeed',
 	});
@@ -837,11 +856,13 @@ gameScene.onButtonPress('shoot', () => {
 // Change player angle 
 
 gameScene.onMouseMove(() => {
-	player.prevAngle = player.angle;
+	if (!isFreezeFrame()) {
+		player.prevAngle = player.angle;
 
-	player.angle = toWorld(mousePos()).angle(player.pos) - 90;
-	updatePlayerGlisten();
-	updatePlayerLeaf();
+		player.angle = toWorld(mousePos()).angle(player.pos) - 90;
+		updatePlayerGlisten();
+		updatePlayerLeaf();
+	}
 })
 
 
@@ -872,7 +893,7 @@ gameScene.loop(0.2, () => {
 
 	// Do player blink
 
-	if (playerEyes.nextBlink < gameTime()) {
+	if (playerEyes.nextBlink < gameTime() && !isFreezeFrame()) {
 		playerEyes.play('blink');
 		playerEyes.nextBlink = gameTime() + rand(4,8);
 
@@ -887,223 +908,226 @@ gameScene.loop(0.2, () => {
 
 gameScene.onUpdate(() => {
 
-	gameScene.get('enemy').forEach((c) => {
+	if (!isFreezeFrame()) {
 
-		// Enemy targetting/aiming
+		gameScene.get('enemy').forEach((c) => {
 
-		let target = player.pos;
-		let distanceToPlayer = c.pos.sdist(player.pos);
+			// Enemy targetting/aiming
 
-		if (c.info.aimSkill == 1) {
-			target = target.add(
-				player.moveVec.scale(
-					UNIT * PLAYER_SPEED * 2 / BULLETS.appleSeed.speed
-				)
-			);
-		}
-		if (c.info.aimSkill == 2) {
-			target = target.add(
-				player.moveVec.scale(
-					Math.sqrt(distanceToPlayer) * PLAYER_SPEED / BULLETS.appleSeed.speed
-				)
-			);
-		}
+			let target = player.pos;
+			let distanceToPlayer = c.pos.sdist(player.pos);
 
-		target = borderResolve(target);
-
-		let angle = target.angle(c.pos) - 90;
-		c.angle = angle;
-
-		// Enemy movement
-
-		if (!c.is('superKb_victim') && distanceToPlayer > (UNIT * c.approachDistance)**2) {
-			c.pos = c.pos.add(
-				Vec2.fromAngle(angle + 90)
-				.scale(UNIT * c.info.speed * dt())
-				.scale(c.is('poisoned') ? POISON_SPEED_MULTI : 1)
-			);
-		}
-
-		processKnockback(c);
-		
-		// Enemy attack
-
-		if (gameTime() > c.nextShootTime && distanceToPlayer < (UNIT * 5)**2) {
-			attack({
-				source: c,
-				type:   'appleSeed',
-			});
-		}
-	})
-	
-	// Player movement controls
-	
-	let w = isButtonDown('up');
-	let a = isButtonDown('left');
-	let s = isButtonDown('down');
-	let d = isButtonDown('right');
-	
-	let newMoveVec = vec2(0,0);
-	
-	if (w || a || s || d) {
-		if (w) newMoveVec = newMoveVec.add(0, -1);
-		if (a) newMoveVec = newMoveVec.add(-1, 0);
-		if (s) newMoveVec = newMoveVec.add(0, 1);
-		if (d) newMoveVec = newMoveVec.add(1, 0);
-	}
-	
-	// Player movement
-	
-	player.moveVec = newMoveVec.unit();
-	player.pos = player.pos.add(
-		player.moveVec.scale(
-			UNIT * dt() * PLAYER_SPEED
-		)
-	);
-
-	processKnockback(player);
-
-	// Player passive regen
-
-	if (player.health < 100) {
-		let timeSinceHit = gameTime() - player.lastHitTime;
-
-		if (timeSinceHit > PASSIVE_HEAL_DELAY) {
-			// Eligible for healing
-			let healAmount;
-
-			if (timeSinceHit > PASSIVE_HEAL_DELAY + SLOW_HEAL_DURATION) {
-				// Max heal rate
-				healAmount = 1;
-			} else {
-				// Slowed heal rate
-				let t = (timeSinceHit - PASSIVE_HEAL_DELAY) / SLOW_HEAL_DURATION;
-				healAmount = t < 0.5 ? (4 * t**3) : (4 * (t-1)**3 + 1);
+			if (c.info.aimSkill == 1) {
+				target = target.add(
+					player.moveVec.scale(
+						UNIT * PLAYER_SPEED * 2 / BULLETS.appleSeed.speed
+					)
+				);
+			}
+			if (c.info.aimSkill == 2) {
+				target = target.add(
+					player.moveVec.scale(
+						Math.sqrt(distanceToPlayer) * PLAYER_SPEED / BULLETS.appleSeed.speed
+					)
+				);
 			}
 
-			player.health = Math.min(
-				100,
-				player.health + healAmount * dt() * HEAL_RATE
-			);
-			updateHealthBar();
+			target = borderResolve(target);
+
+			let angle = target.angle(c.pos) - 90;
+			c.angle = angle;
+
+			// Enemy movement
+
+			if (!c.is('superKb_victim') && distanceToPlayer > (UNIT * c.approachDistance)**2) {
+				c.pos = c.pos.add(
+					Vec2.fromAngle(angle + 90)
+					.scale(UNIT * c.info.speed * dt())
+					.scale(c.is('poisoned') ? POISON_SPEED_MULTI : 1)
+				);
+			}
+
+			processKnockback(c);
+			
+			// Enemy attack
+
+			if (gameTime() > c.nextShootTime && distanceToPlayer < (UNIT * 5)**2) {
+				attack({
+					source: c,
+					type:   'appleSeed',
+				});
+			}
+		})
+		
+		// Player movement controls
+		
+		let w = isButtonDown('up');
+		let a = isButtonDown('left');
+		let s = isButtonDown('down');
+		let d = isButtonDown('right');
+		
+		let newMoveVec = vec2(0,0);
+		
+		if (w || a || s || d) {
+			if (w) newMoveVec = newMoveVec.add(0, -1);
+			if (a) newMoveVec = newMoveVec.add(-1, 0);
+			if (s) newMoveVec = newMoveVec.add(0, 1);
+			if (d) newMoveVec = newMoveVec.add(1, 0);
 		}
-	}
-
-	// Player border resolution
-
-	player.pos = borderResolve(player.pos);
-
-	// Player visual effects
-
-	playerLeaf.angle = decay(playerLeaf.angle, playerLeaf.targetRotation, 10);
-
-	
-	gameScene.get('bullet').forEach((b) => {
 		
-		// Bullet movement
-
-		b.lastPos = b.pos;
-		b.pos = b.pos.add(b.moveVec.scale(dt()));
-
-		// Bullet collision
-		let victims;
+		// Player movement
 		
-		victims = gameScene.get(
-			b.isFromEnemy ? 'ally' : 'enemy'
+		player.moveVec = newMoveVec.unit();
+		player.pos = player.pos.add(
+			player.moveVec.scale(
+				UNIT * dt() * PLAYER_SPEED
+			)
 		);
 
-		for (let i = 0; i < victims.length; i++) {
-			let v = victims[i];
+		processKnockback(player);
 
-			let radius = b.info.scale/2 + 0.4;
-			radius *= UNIT;
+		// Player passive regen
 
-			if (b.pos.sdist(v.pos) < radius * radius && !b.hasHit.includes(v.id)) {
-				bulletCollision(b, v);
-				break;
+		if (player.health < 100) {
+			let timeSinceHit = gameTime() - player.lastHitTime;
+
+			if (timeSinceHit > PASSIVE_HEAL_DELAY) {
+				// Eligible for healing
+				let healAmount;
+
+				if (timeSinceHit > PASSIVE_HEAL_DELAY + SLOW_HEAL_DURATION) {
+					// Max heal rate
+					healAmount = 1;
+				} else {
+					// Slowed heal rate
+					let t = (timeSinceHit - PASSIVE_HEAL_DELAY) / SLOW_HEAL_DURATION;
+					healAmount = t < 0.5 ? (4 * t**3) : (4 * (t-1)**3 + 1);
+				}
+
+				player.health = Math.min(
+					100,
+					player.health + healAmount * dt() * HEAL_RATE
+				);
+				updateHealthBar();
 			}
+		}
 
-			if (b.superKbInfo) {
-				let hitboxExtender = b.superKbInfo.entangle;
-				let radius2 = hitboxExtender.info.scale/2 + v.info.scale/2;
-				if (b.pos.sdist(hitboxExtender.pos) < radius2 * radius2 && !b.hasHit.includes(v.id)) {
+		// Player border resolution
+
+		player.pos = borderResolve(player.pos);
+
+		// Player visual effects
+
+		playerLeaf.angle = decay(playerLeaf.angle, playerLeaf.targetRotation, 10);
+
+		
+		gameScene.get('bullet').forEach((b) => {
+			
+			// Bullet movement
+
+			b.lastPos = b.pos;
+			b.pos = b.pos.add(b.moveVec.scale(dt()));
+
+			// Bullet collision
+			let victims;
+			
+			victims = gameScene.get(
+				b.isFromEnemy ? 'ally' : 'enemy'
+			);
+
+			for (let i = 0; i < victims.length; i++) {
+				let v = victims[i];
+
+				let radius = b.info.scale/2 + 0.4;
+				radius *= UNIT;
+
+				if (b.pos.sdist(v.pos) < radius * radius && !b.hasHit.includes(v.id)) {
 					bulletCollision(b, v);
 					break;
 				}
+
+				if (b.superKbInfo) {
+					let hitboxExtender = b.superKbInfo.entangle;
+					let radius2 = hitboxExtender.info.scale/2 + v.info.scale/2;
+					if (b.pos.sdist(hitboxExtender.pos) < radius2 * radius2 && !b.hasHit.includes(v.id)) {
+						bulletCollision(b, v);
+						break;
+					}
+				}
 			}
+		})
+
+		// Poison control (get it??)
+
+		gameScene.get('poisoned').forEach((c) => {
+			let p = c.poison;
+
+			if (gameTime() > p.nextTick) {
+				// do damage
+				totalPsn += Math.min(c.health, p.damage); //deleteme
+				c.health -= p.damage;
+				if (c.health <= 0) {
+					death(c);
+				} else {
+					damageFlash(c, 'poison');
+				}
+
+				// setup next tick or end poison
+				p.ticksRemaining--;
+
+				if (p.ticksRemaining > 0) {
+					p.nextTick = gameTime() + POISON_TICK_INTERVAL;
+				} else {
+					c.untag('poisoned');
+				}
+
+			}
+		})
+
+		// Camera effects
+
+		let targetCamScale = 1 - isMouseDown() * CAMERA_ZOOM_MAGNITUDE;
+		let targetCamOffset = mousePos().sub(center()).scale(CAMERA_SHIFT_MAGNITUDE);
+
+		// Zoom
+		setCamScale(
+			vec2(
+				(getCamScale().x - targetCamScale) 
+				/ 2 ** (CAMERA_ZOOM_SPEED * dt()) 
+				+ targetCamScale
+			)
+		);
+
+		// Offset
+		let nextCamOffset = decay(
+			GAME_STATUS.CURRENT_CAM_SHIFT,
+			targetCamOffset,
+			CAMERA_SHIFT_SPEED,
+		);
+		GAME_STATUS.CURRENT_CAM_SHIFT = nextCamOffset;
+		setCamPos(player.pos.add(nextCamOffset));
+
+		// Update time
+
+		if (!gameScene.paused) GAME_STATUS.GAME_TIME += dt();
+
+		// Debug info
+
+		if (debug.inspect) {
+			let on = GAME_STATUS.CHAR_ONSCREEN;
+			let onOffTotal = GAME_STATUS.CHAR_ONSCREEN + GAME_STATUS.CHAR_OFFSCREEN;
+
+			debug.clearLog();
+			debug.log(`
+				objs:  ${debug.numObjects()} (${on}/${onOffTotal})
+				draw:  ${debug.drawCalls()}
+			`);
 		}
-	})
 
-	// Poison control (get it??)
+		//debug.log(`${totaldmg}d -- ${totalPsn}p -- $${STATS.money}`)
 
-	gameScene.get('poisoned').forEach((c) => {
-		let p = c.poison;
-
-		if (gameTime() > p.nextTick) {
-			// do damage
-			totalPsn += Math.min(c.health, p.damage); //deleteme
-			c.health -= p.damage;
-			if (c.health <= 0) {
-				death(c);
-			} else {
-				damageFlash(c, 'poison');
-			}
-
-			// setup next tick or end poison
-			p.ticksRemaining--;
-
-			if (p.ticksRemaining > 0) {
-				p.nextTick = gameTime() + POISON_TICK_INTERVAL;
-			} else {
-				c.untag('poisoned');
-			}
-
-		}
-	})
-
-	// Camera effects
-
-	let targetCamScale = 1 - isMouseDown() * CAMERA_ZOOM_MAGNITUDE;
-	let targetCamOffset = mousePos().sub(center()).scale(CAMERA_SHIFT_MAGNITUDE);
-
-	// Zoom
-	setCamScale(
-		vec2(
-			(getCamScale().x - targetCamScale) 
-			/ 2 ** (CAMERA_ZOOM_SPEED * dt()) 
-			+ targetCamScale
-		)
-	);
-
-	// Offset
-	let nextCamOffset = decay(
-		GAME_STATUS.CURRENT_CAM_SHIFT,
-		targetCamOffset,
-		CAMERA_SHIFT_SPEED,
-	);
-	GAME_STATUS.CURRENT_CAM_SHIFT = nextCamOffset;
-	setCamPos(player.pos.add(nextCamOffset));
-
-	// Update time
-
-	if (!gameScene.paused) GAME_STATUS.GAME_TIME += dt();
-
-	// Debug info
-
-	if (debug.inspect) {
-		let on = GAME_STATUS.CHAR_ONSCREEN;
-		let onOffTotal = GAME_STATUS.CHAR_ONSCREEN + GAME_STATUS.CHAR_OFFSCREEN;
-
-		debug.clearLog();
-		debug.log(`
-			objs:  ${debug.numObjects()} (${on}/${onOffTotal})
-			draw:  ${debug.drawCalls()}
-		`);
-	}
-
-	//debug.log(`${totaldmg}d -- ${totalPsn}p -- $${STATS.money}`)
-
-	if (isKeyDown('z')) setCamScale(0.4);
-	if (isKeyDown('x')) { summonEnemy({type: 'basic', count: 5}); };
-	//if (isKeyDown('x')) { summonEnemy({type: 'test', count: 5}); };
+		if (isKeyDown('z')) setCamScale(0.4);
+		if (isKeyDown('x')) { summonEnemy({type: 'basic', count: 5}); };
+		//if (isKeyDown('x')) { summonEnemy({type: 'test', count: 5}); };
+	};
 })
