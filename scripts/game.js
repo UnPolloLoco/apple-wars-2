@@ -842,13 +842,17 @@ onButtonPress('pause', () => {
 
 })
 
-gameScene.onMouseDown(() => {
-	if (!isFreezeFrame()) pressButton('shoot');
+gameScene.onButtonPress('dash', () => {
+	debug.log('dash')
 })
 
-gameScene.onButtonPress('shoot', () => {
+//gameScene.onMouseDown(() => {
+//	if (!isFreezeFrame()) pressButton('shoot');
+//})
+
+gameScene.onButtonDown('shoot', () => {
 	if (!isFreezeFrame() && gameTime() > player.nextShootTime) attack({
-		source: player,
+		source:  player,
 		type:   'appleSeed',
 	});
 })

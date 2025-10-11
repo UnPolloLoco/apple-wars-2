@@ -20,13 +20,15 @@ kaboom({
 	pixelDensity: 1,
 	logMax: 3,
 	debugKey: 'i',
+	texFilter: 'linear',
 	buttons: {
 		up:    { keyboard: ["w"] },
 		left:  { keyboard: ["a"] },
 		down:  { keyboard: ["s"] },
 		right: { keyboard: ["d"] },
-        shoot: { keyboard: ["space"] },
+        shoot: { mouse: "left" },
         pause: { keyboard: ["p", "escape"] },
+		dash:  { keyboard: ["space"], mouse: ["right"]},
     },
 });
 
