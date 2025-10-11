@@ -488,7 +488,7 @@ function summonEnemy(data) {
 		}
 
 		gameScene.add([
-			sprite('bean'),
+			sprite('enemy'),
 			pos(player.pos.add(
 				Vec2.fromAngle(spawnDir).scale(UNIT * spawnDist)
 			)),
