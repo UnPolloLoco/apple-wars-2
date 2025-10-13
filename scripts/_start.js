@@ -50,6 +50,10 @@ const SUPER_KB_IMPACT_SPEED_MULTI = 0.8;
 const DAMAGE_FLASH = { r:1, g:1, b:1, strength:0.65 };
 const POISON_FLASH = { r:0.6, g:0.3, b:1, strength:0.85 };
 
+const DASH_COOLDOWN = 2;
+const DASH_DURATION = 0.2;
+const DASH_SPEED = 13;
+
 const PASSIVE_HEAL_DELAY = 1.5; // Time after taking damage until healing starts
 const HEAL_RATE = 5;
 const SLOW_HEAL_DURATION = 4;

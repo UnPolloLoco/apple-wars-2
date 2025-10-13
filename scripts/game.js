@@ -109,6 +109,7 @@ const player = gameScene.add([
 		nextShootTime:	0,
 		health:			100,
 		moveVec:		vec2(0,0),
+		lastMoveVec:	vec2(1,0),
 		knockbackVec:	vec2(0,0),
 		lastHitTime:	-10,
 		prevAngle:		0,
@@ -117,6 +118,8 @@ const player = gameScene.add([
 			nextTick:			0,
 			ticksRemaining:		0,
 		},
+		state: 			'normal',
+		nextDashTime:	0,
 	}
 ])
 
@@ -843,7 +846,14 @@ onButtonPress('pause', () => {
 })
 
 gameScene.onButtonPress('dash', () => {
-	debug.log('dash')
+	if (player.nextDashTime < gameTime()) {
+		player.state = 'dashing';
+		player.nextDashTime = gameTime() + DASH_COOLDOWN;
+
+		gameScene.wait(DASH_DURATION, () => {
+			player.state = 'normal';
+		})
+	}
 })
 
 //gameScene.onMouseDown(() => {
@@ -965,30 +975,50 @@ gameScene.onUpdate(() => {
 		
 		// Player movement controls
 		
-		let w = isButtonDown('up');
-		let a = isButtonDown('left');
-		let s = isButtonDown('down');
-		let d = isButtonDown('right');
-		
-		let newMoveVec = vec2(0,0);
-		
-		if (w || a || s || d) {
-			if (w) newMoveVec = newMoveVec.add(0, -1);
-			if (a) newMoveVec = newMoveVec.add(-1, 0);
-			if (s) newMoveVec = newMoveVec.add(0, 1);
-			if (d) newMoveVec = newMoveVec.add(1, 0);
-		}
-		
-		// Player movement
-		
-		player.moveVec = newMoveVec.unit();
-		player.pos = player.pos.add(
-			player.moveVec.scale(
-				UNIT * dt() * PLAYER_SPEED
+		if (player.state == 'normal') {
+			let w = isButtonDown('up');
+			let a = isButtonDown('left');
+			let s = isButtonDown('down');
+			let d = isButtonDown('right');
+			
+			let newMoveVec = vec2(0,0);
+			
+			if (w || a || s || d) {
+				if (w) newMoveVec = newMoveVec.add(0, -1);
+				if (a) newMoveVec = newMoveVec.add(-1, 0);
+				if (s) newMoveVec = newMoveVec.add(0, 1);
+				if (d) newMoveVec = newMoveVec.add(1, 0);
+			}
+			
+			// Player movement
+			
+			player.moveVec = newMoveVec.unit();
+
+			if (Math.abs(player.moveVec.x) > 0.1 || Math.abs(player.moveVec.y) > 0.1) {
+				// for dashing
+				player.lastMoveVec = player.moveVec;
+			}
+			player.pos = player.pos.add(
+				player.moveVec.scale(
+					UNIT * dt() * PLAYER_SPEED
+				)
+			);
+
+		} else if (player.state == 'dashing') {
+			// Dash movement
+
+			player.pos = player.pos.add(
+				player.lastMoveVec.scale(
+					UNIT * dt() * DASH_SPEED
+				)
 			)
-		);
+		}
 
 		processKnockback(player);
+
+		// Player border resolution
+
+		player.pos = borderResolve(player.pos);
 
 		// Player passive regen
 
@@ -1015,10 +1045,6 @@ gameScene.onUpdate(() => {
 				updateHealthBar();
 			}
 		}
-
-		// Player border resolution
-
-		player.pos = borderResolve(player.pos);
 
 		// Player visual effects
 
