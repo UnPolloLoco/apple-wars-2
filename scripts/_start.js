@@ -97,10 +97,15 @@ loadSpriteAtlas('sprites/apple.png', {
 	'apple_leaf': { x: 88, y: 1, width: 30, height: 51 },
 
 	'apple_eyes': { x: 120, y: 1, width: 170, height: 86, sliceX: 2, sliceY: 2,
-		anims: { blink: { frames: [0, 1, 2], speed: 25 } },
+		anims: { 'blink': { frames: [0, 1, 2], speed: 25 } },
 	},
 	
 	'apple_glisten': { x: 1, y: 89, width: 320, height: 64, sliceX: 5 },
+})
+
+loadSprite('spurt', 'sprites/spurt.png', {
+	sliceY: 5,
+	anims: { 'spurt': { from: 0, to: 4, speed: 18 } },
 })
 
 loadSprite('grass', 'sprites/grass.png', {

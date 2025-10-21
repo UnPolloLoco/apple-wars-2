@@ -619,11 +619,27 @@ function bulletCollision(b, c) {
 		// Super KB speed reduction
 		if (b.info.special.superKb) b.moveVec = b.moveVec.scale(SUPER_KB_IMPACT_SPEED_MULTI);
 
+		// Impact effects
+		let spurtScale = 0.85;
+		if (c != player) spurtScale = c.info.scale;
+
+		let spurt = gameScene.add([
+			sprite('spurt', { anim: 'spurt' }),
+			scale(UNIT / 191 * 2.25 * spurtScale),
+			pos(c.pos),
+			rotate(b.angle + 90),
+			anchor(vec2(-0.333, 0)),
+			z(LAYERS.players - 10),
+			color(255, 250, 190),
+		])
+		spurt.onAnimEnd(() => { destroy(spurt); });
+
+
 		if (c.health <= 0) {
 			// Death
 			death(c);
 		} else {
-			// Impact effects
+			// Impact effects (NON-LETHAL ONLY)
 			damageFlash(c, 'basic');
 
 			// Poison
