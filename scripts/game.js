@@ -8,15 +8,19 @@ const LAYERS = {
 setCamPos(0, 0);
 
 const GAME_STATUS = {
-	CURRENT_CAM_SHIFT: vec2(0),
 	CHAR_OFFSCREEN: 0,
 	CHAR_ONSCREEN: 0,
+
 	GAME_TIME: 0,
-	STATUS: {
-		LOCATION: 'level1',
-		STATE: 'normal',
-	},
+	CURRENT_CAM_SHIFT: vec2(0),
 	FREEZE_FRAME_UNTIL: 0,
+	STATE: 'normal',
+
+	LOCATION: 'level1',
+	PHASE: {
+		NAME: 't1',
+		TIME: 0,
+	}
 }
 
 const gameScene =	add([ z(0), timer() ]);
