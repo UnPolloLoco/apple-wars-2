@@ -73,7 +73,8 @@ const ARENA_TILE_SIZE = 5;
 loadBean();
 
 loadSprite('placeholder', 'https://iili.io/FGY2sv2.md.png');
-loadSprite('bullet', 'https://iili.io/KN8qlz7.png');
+loadSprite('bul_appleSeed', 'https://iili.io/KN8qlz7.png');
+loadSprite('bul_strawberrySeed', 'https://iili.io/KtHgKzb.png');
 loadSprite('enemy', 'https://iili.io/KN8fNPs.png')
 
 loadRoot('https://unpolloloco.github.io/apple-wars-2/assets/');
@@ -105,7 +106,7 @@ loadSpriteAtlas('sprites/apple.png', {
 
 loadSprite('spurt', 'sprites/spurt.png', {
 	sliceY: 5,
-	anims: { 'spurt': { from: 0, to: 4, speed: 18 } },
+	anims: { 'spurt': { from: 0, to: 4, speed: 30 } },
 })
 
 loadSprite('grass', 'sprites/grass.png', {

@@ -27,8 +27,8 @@ const BULLETS = {
 		name: 'Strawberry Seed',
 		damage:	6,
 		speed:	12,
-		size:	28,
-		scale:	0.2,
+		size:	22,
+		scale:	0.22,
 		delay:	0.1,
 		special: {
 			count:  3,

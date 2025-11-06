@@ -543,8 +543,11 @@ function attack(data) {
 		let bAngle = s.angle += rand(-BULLET_SPREAD, BULLET_SPREAD);
 		if (bInfo.special.count) bAngle += (n - relativeSpread) * bInfo.special.spread / relativeSpread / 2;
 
+		let spriteName = data.type;
+		if (!(spriteName == 'appleSeed' || spriteName == 'strawberrySeed')) spriteName = 'appleSeed';
+
 		let bullet = gameScene.add([
-			sprite('bullet'),
+			sprite(`bul_${spriteName}`), // e.g. bul_appleSeed
 			pos(s.pos),
 			scale(UNIT / bInfo.size * bInfo.scale),
 			rotate(bAngle),
@@ -602,7 +605,7 @@ function damageFlash(victim, flashType) {
 	}[flashType];
 
 	victim.use(shader('flash', () => (flashData)));
-	gameScene.wait(0.05, () => { victim.unuse('shader') })
+	gameScene.wait(0.1, () => { victim.unuse('shader') })
 }
 
 // Bullet collide function
@@ -883,7 +886,7 @@ gameScene.onButtonPress('dash', () => {
 gameScene.onButtonDown('shoot', () => {
 	if (!isFreezeFrame() && gameTime() > player.nextShootTime) attack({
 		source:  player,
-		type:   'appleSeed',
+		type:   'strawberrySeed',
 	});
 })
 
