@@ -29,6 +29,7 @@ kaboom({
         shoot: { mouse: "left" },
         pause: { keyboard: ["p", "escape"] },
 		dash:  { keyboard: ["space"], mouse: ["right"]},
+		swap:  { keyboard: ["t"] },
     },
 });
 
@@ -68,7 +69,17 @@ const CAMERA_SHIFT_MAGNITUDE = 0.1;
 const ARENA_DIMENSIONS = [8,6];
 const ARENA_TILE_SIZE = 5;
 
+const BULLET_ICON_EQUIPPED_Z = 0; // Desired z layer of a bullet slot/icon depending on if it's active or not
+const BULLET_SLOT_EQUIPPED_Z = -1;
+const BULLET_ICON_UNEQUIPPED_Z = -2;
+const BULLET_SLOT_UNEQUIPPED_Z = -3;
+const BULLET_SLOT_STANDARD_SCALE = UNIT / 115 * 1.15;
+const BULLET_ICON_STANDARD_SCALE = UNIT * 0.7;
+const BULLET_SECONDARY_DISPLAY_SCALE_MULTI = 65/115; // Don't mess with the magic number
+
+
 // Sprite padding is one pixel on the border, and two pixels between sprites.
+// Specify 1px padding when combining individual drawings, 0px when combining spritesheets
 
 loadBean();
 
@@ -76,6 +87,12 @@ loadSprite('placeholder', 'https://iili.io/FGY2sv2.md.png');
 loadSprite('bul_appleSeed', 'https://iili.io/KN8qlz7.png');
 loadSprite('bul_strawberrySeed', 'https://iili.io/KtHgKzb.png');
 loadSprite('enemy', 'https://iili.io/KN8fNPs.png')
+
+loadSpriteAtlas('https://iili.io/fBRKXRt.png', {
+	'bulletSlot_primary': { x: 1, y: 1, width: 115, height: 115 },
+	'bulletSlot_transition': { x: 118, y: 1, width: 115, height: 115 },
+	'bulletSlot_secondary': { x: 235, y: 1, width: 115, height: 115 },
+})
 
 loadRoot('https://unpolloloco.github.io/apple-wars-2/assets/');
 
@@ -88,9 +105,9 @@ loadSpriteAtlas('sprites/ui.png', {
 	'healthBar_empty': { x: 1, y: 264, width: 600, height: 100 },
 	'healthBar_flash': { x: 1, y: 366, width: 600, height: 100 },
 	
-	'bulletSlot_primary': { x: 1, y: 468, width: 115, height: 115 },
-	'bulletSlot_transition': { x: 118, y: 468, width: 95, height: 95 },
-	'bulletSlot_secondary': { x: 215, y: 468, width: 75, height: 75 },
+	//'bulletSlot_primary': { x: 1, y: 468, width: 115, height: 115 },
+	//'bulletSlot_transition': { x: 118, y: 468, width: 95, height: 95 },
+	//'bulletSlot_secondary': { x: 215, y: 468, width: 75, height: 75 },
 })
 
 loadSpriteAtlas('sprites/apple.png', {

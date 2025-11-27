@@ -1,3 +1,15 @@
+const DATA = {
+	money: 			0,
+	bullets:		['appleSeed', 'strawberrySeed'],
+	selectedBullet: 0,
+}
+
+// ---------------------- //
+// ---   GAME SCENE   --- //
+// ---------------------- //
+
+scene('game', () => {
+
 const LAYERS = {
 	ground:  100,
 	players: 200,
@@ -15,6 +27,7 @@ const GAME_STATUS = {
 	CURRENT_CAM_SHIFT: vec2(0),
 	FREEZE_FRAME_UNTIL: 0,
 	STATE: 'normal',
+	IS_SWITCHING_BULLETS: false,
 
 	LOCATION: 'level1',
 	PHASE: {
@@ -25,11 +38,7 @@ const GAME_STATUS = {
 
 const gameScene =	add([ z(0), timer() ]);
 const pauseMenu =	add([ z(1), timer(), {opacityTween: null} ]);
-const ui = 			add([ z(2), timer(), ]);
-
-const STATS = {
-	'money': 0,
-}
+const ui = 		    add([ z(2), timer(), ]);
 
 
 var totaldmg = 0; var totalPsn = 0;
@@ -91,6 +100,7 @@ for (let x = 0; x < arenaWidth; x++) {
 			}),
 			anchor('center'),
 			z(LAYERS.ground),
+			//color(rgb(55, 135, 255)),
 			"grass"
 		])
 	}
@@ -162,30 +172,100 @@ const playerLeaf = player.add([
 
 // Bullet Displays
 
-const bulletDisplay = ui.add([
+const bulletDisplaySlot = ui.add([
 	pos(UNIT*0.75, UNIT*0.75),
 	sprite('bulletSlot_primary'),
-	scale(UNIT / 115 * 1.15),
+	scale(BULLET_SLOT_STANDARD_SCALE),
 	fixed(),
-	z(LAYERS.ui),
+	z(LAYERS.ui + BULLET_SLOT_EQUIPPED_Z),
+	"prim",
+	{
+		default: {
+			slotScale: null,
+			slotPos: null,
+			iconScale: null,
+			iconPos: null,
+		}
+	}
 ])
 
-const bulletDisplaySecondary = ui.add([
-	pos(bulletDisplay.pos.add(
-		UNIT * 0.4, 
-		UNIT * 0.6, 
+// NOTE, 'secondary' just means it STARTS unequipped, it will be called 'secondary' even if it's the main active bullet
+const bulletDisplaySlotSecondary = ui.add([
+	pos(bulletDisplaySlot.pos.add(
+		UNIT * 0.525, 
+		UNIT * 0.725, 
 	)),
 	sprite('bulletSlot_secondary'),
-	scale(UNIT / 75 * 0.75),
+	scale(BULLET_SLOT_STANDARD_SCALE * BULLET_SECONDARY_DISPLAY_SCALE_MULTI),
 	fixed(),
-	z(LAYERS.ui - 1),
+	z(LAYERS.ui + BULLET_SLOT_UNEQUIPPED_Z),
+	{
+		default: {
+			slotScale: null,
+			slotPos: null,
+			iconScale: null,
+			iconPos: null,
+		}
+	}
 ])
+
+const bulletDisplayIcon = ui.add([
+	pos(bulletDisplaySlot.pos.add(UNIT * 1.15/2)),
+	sprite('bul_appleSeed'),
+	scale(0),
+	fixed(),
+	z(LAYERS.ui + BULLET_ICON_EQUIPPED_Z),
+	anchor('center'),
+	{
+		baseScale: null,
+		spriteScale: null,
+	}
+])
+
+const bulletDisplayIconSecondary = ui.add([
+	pos(bulletDisplaySlotSecondary.pos.add(UNIT * 0.65/2)),
+	sprite('bul_appleSeed'),
+	scale(0),
+	fixed(),
+	z(LAYERS.ui + BULLET_ICON_UNEQUIPPED_Z),
+	anchor('center'),
+	{
+		baseScale: null,
+		spriteScale: null,
+	}
+])
+
+// Set bullet display icon sprite/scale
+
+let db = DATA.bullets;
+
+bulletDisplayIcon.sprite = `bul_${db[0]}`;
+bulletDisplayIcon.spriteScale = BULLETS[db[0]].size;
+bulletDisplayIcon.scale = vec2(BULLET_ICON_STANDARD_SCALE / bulletDisplayIcon.spriteScale);
+
+bulletDisplayIconSecondary.sprite = `bul_${db[1]}`;
+bulletDisplayIconSecondary.spriteScale = BULLETS[db[1]].size;
+bulletDisplayIconSecondary.scale = vec2(BULLET_ICON_STANDARD_SCALE * BULLET_SECONDARY_DISPLAY_SCALE_MULTI / bulletDisplayIconSecondary.spriteScale);
+
+// Setting bullet display defaults (used for swap animation)
+
+for (let num = 0; num <= 1; num++) {
+	let bds = [bulletDisplaySlot, bulletDisplaySlotSecondary][num];
+	let bdi = [bulletDisplayIcon, bulletDisplayIconSecondary][num];
+
+	bds.default.slotScale = {...bds.scale};
+	bds.default.slotPos = {...bds.pos};
+
+	bds.default.iconScale = {...bdi.scale.scale(bdi.spriteScale)};
+	bds.default.iconPos = {...bdi.pos};
+}
+
 
 // Ability
 
 const abilityDisplay = ui.add([
 	pos(
-		bulletDisplay.pos.x + UNIT * 1.3, 
+		bulletDisplaySlot.pos.x + UNIT * 1.3, 
 		UNIT * 2.1),
 	sprite('abilityMeter_empty'),
 	anchor('botleft'),
@@ -320,7 +400,7 @@ const healthBarShadow = healthBarShadowMask.add([
 // Money counter
 
 const moneyCounter = ui.add([
-	pos(bulletDisplay.pos.add(
+	pos(bulletDisplaySlot.pos.add(
 		0, UNIT*1.75
 	)),
 	text('$0', {
@@ -588,7 +668,7 @@ function death(victim) {
 		debug.log('DEAD!')
 	} else {
 		if (victim.is('enemy')) {
-			STATS.money += 1;
+			DATA.money += 1;
 			updateMoneyCounter();
 		}
 		destroy(victim);
@@ -802,7 +882,7 @@ function updateHealthBar() {
 // Player money display
 
 function updateMoneyCounter() {
-	moneyCounter.text = `\$${Math.floor(STATS.money)}`;
+	moneyCounter.text = `\$${Math.floor(DATA.money)}`;
 }
 
 // Player glisten effect
@@ -845,6 +925,70 @@ function updatePlayerLeaf() {
 	playerLeaf.targetRotation = newTarget;
 }
 
+// Swap bullet slots
+
+function swapSelectedBullet() {
+	if (!GAME_STATUS.IS_SWITCHING_BULLETS) {
+		GAME_STATUS.IS_SWITCHING_BULLETS = true;
+
+		DATA.selectedBullet = 1 - DATA.selectedBullet;
+
+		// Animation...
+
+		let bs = [bulletDisplaySlot, bulletDisplaySlotSecondary];
+		let bi = [bulletDisplayIcon, bulletDisplayIconSecondary];
+		let spriteList = ['bulletSlot_primary', 'bulletSlot_transition', 'bulletSlot_secondary'];
+		let duration = 0.2;
+
+		// Loop over the slots— first primary, then secondary
+		for (let num = 0; num <= 1; num++) {
+			let willBeMainSlot = DATA.selectedBullet == num; // true if this slot is the one actively being equipped
+			let initialInfo = bs[0 + willBeMainSlot].default; // { slotScale, slotPos, iconScale, iconPos }
+			let targetInfo = bs[1 - willBeMainSlot].default; // { slotScale, slotPos, iconScale, iconPos }
+
+			let thisSlot = bs[num];
+			let thisIcon = bi[num];
+			
+			if (willBeMainSlot) {
+				thisSlot.z = LAYERS.ui + BULLET_SLOT_EQUIPPED_Z;
+				thisIcon.z = LAYERS.ui + BULLET_ICON_EQUIPPED_Z;
+			} else {
+				thisSlot.z = LAYERS.ui + BULLET_SLOT_UNEQUIPPED_Z;
+				thisIcon.z = LAYERS.ui + BULLET_ICON_UNEQUIPPED_Z;
+			}
+
+			gameScene.tween(
+				0, 1, duration,
+				(t) => {
+					// Slot
+					thisSlot.pos.x = map(t,0,1, initialInfo.slotPos.x, targetInfo.slotPos.x);
+					thisSlot.pos.y = map(t,0,1, initialInfo.slotPos.y, targetInfo.slotPos.y);
+					thisSlot.scale.x = map(t,0,1, initialInfo.slotScale.x, targetInfo.slotScale.x);
+					thisSlot.scale.y = map(t,0,1, initialInfo.slotScale.y, targetInfo.slotScale.y);
+					
+					// Icon
+					thisIcon.pos.x = map(t,0,1, initialInfo.iconPos.x, targetInfo.iconPos.x);
+					thisIcon.pos.y = map(t,0,1, initialInfo.iconPos.y, targetInfo.iconPos.y);
+					thisIcon.scale.x = map(t,0,1, initialInfo.iconScale.x, targetInfo.iconScale.x) / thisIcon.spriteScale;
+					thisIcon.scale.y = map(t,0,1, initialInfo.iconScale.y, targetInfo.iconScale.y) / thisIcon.spriteScale;
+
+					if (willBeMainSlot) {
+						thisSlot.sprite = spriteList[clamp(2 - Math.floor(t*3), 0,2)];
+					} else {
+						thisSlot.sprite = spriteList[clamp(Math.floor(t*3), 0,2)];
+					}
+				},
+				easings.easeInOutQuad,
+			)
+		}
+
+		// Revert
+		gameScene.wait(duration, () => {
+			GAME_STATUS.IS_SWITCHING_BULLETS = false;
+		});
+	}
+}
+
 
 
 // ---------------------------- //
@@ -879,14 +1023,19 @@ gameScene.onButtonPress('dash', () => {
 	}
 })
 
+gameScene.onButtonPress('swap', () => {
+	// Additional logic is within function already
+	swapSelectedBullet();
+})
+
 //gameScene.onMouseDown(() => {
 //	if (!isFreezeFrame()) pressButton('shoot');
 //})
 
 gameScene.onButtonDown('shoot', () => {
 	if (!isFreezeFrame() && gameTime() > player.nextShootTime) attack({
-		source:  player,
-		type:   'strawberrySeed',
+		source: player,
+		type:	DATA.bullets[DATA.selectedBullet],
 	});
 })
 
@@ -1177,10 +1326,15 @@ gameScene.onUpdate(() => {
 			`);
 		}
 
-		//debug.log(`${totaldmg}d -- ${totalPsn}p -- $${STATS.money}`)
+		//debug.log(`${totaldmg}d -- ${totalPsn}p -- $${DATA.money}`)
 
 		if (isKeyDown('z')) setCamScale(0.4);
 		if (isKeyDown('x')) { summonEnemy({type: 'basic', count: 5}); };
 		//if (isKeyDown('x')) { summonEnemy({type: 'test', count: 5}); };
 	};
 })
+
+// End of scene
+});
+
+go('game');

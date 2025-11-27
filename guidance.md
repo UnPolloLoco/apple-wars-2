@@ -13,6 +13,15 @@ For when memory fails...
 &nbsp;
 
 
+## Code Terminology
+
+- *"Bullet display"*: Bullet selector/indicator on game UI
+- *"Bullet display slot"*: Background disc on bullet display
+- *"Bullet display icon"*: Bullet sprite on bullet display
+
+&nbsp;
+
+
 ## Tags
 
 - `character`: Any living thing
