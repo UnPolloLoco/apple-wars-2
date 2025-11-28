@@ -165,6 +165,16 @@ const playerLeaf = player.add([
 	}
 ])
 
+/*
+player.add([
+	sprite('shadow'),
+	pos(200,0),
+	anchor('center'),
+	z(LAYERS.players - 1),
+	scale(85/50),
+	opacity(0.4),
+])
+*/
 
 // --------------------- //
 // ---      UI       --- //
@@ -711,7 +721,10 @@ function bulletCollision(b, c) {
 		if (c != player) spurtScale = c.info.scale;
 
 		let spurt = gameScene.add([
-			sprite('spurt', { anim: 'spurt' }),
+			sprite('spurt', { 
+				anim: 'spurt',
+				flipY: rand(0,100) < 50,
+			}),
 			scale(UNIT / 191 * 2.25 * spurtScale),
 			pos(c.pos),
 			rotate(b.angle + 90),

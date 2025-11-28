@@ -87,6 +87,7 @@ loadSprite('placeholder', 'https://iili.io/FGY2sv2.md.png');
 loadSprite('bul_appleSeed', 'https://iili.io/KN8qlz7.png');
 loadSprite('bul_strawberrySeed', 'https://iili.io/KtHgKzb.png');
 loadSprite('enemy', 'https://iili.io/KN8fNPs.png')
+loadSprite('shadow', 'https://iili.io/fCyT2Cg.png')
 
 loadSpriteAtlas('https://iili.io/fBRKXRt.png', {
 	'bulletSlot_primary': { x: 1, y: 1, width: 115, height: 115 },
