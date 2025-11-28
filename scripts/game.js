@@ -165,16 +165,8 @@ const playerLeaf = player.add([
 	}
 ])
 
-/*
-player.add([
-	sprite('shadow'),
-	pos(200,0),
-	anchor('center'),
-	z(LAYERS.players - 1),
-	scale(85/50),
-	opacity(0.4),
-])
-*/
+addCharacterShadow(player);
+
 
 // --------------------- //
 // ---      UI       --- //
@@ -584,7 +576,7 @@ function summonEnemy(data) {
 			spawnDist += rand(-1, 1);
 		}
 
-		gameScene.add([
+		let newEnemy = gameScene.add([
 			sprite('enemy'),
 			pos(player.pos.add(
 				Vec2.fromAngle(spawnDir).scale(UNIT * spawnDist)
@@ -610,6 +602,8 @@ function summonEnemy(data) {
 				},
 			}
 		])
+
+		addCharacterShadow(newEnemy);
 	}
 }
 
@@ -938,6 +932,20 @@ function updatePlayerLeaf() {
 	playerLeaf.targetRotation = newTarget;
 }
 
+// Give a character a shadow
+
+function addCharacterShadow(who) {
+	who.add([
+		sprite('shadow'),
+		pos(0,0),
+		anchor('center'),
+		z(LAYERS.ground + 1),
+		scale(2.34),
+		opacity(0.275),
+		'characterShadow',
+	])
+}
+
 // Swap bullet slots
 
 function swapSelectedBullet() {
@@ -1063,7 +1071,6 @@ gameScene.onMouseMove(() => {
 		updatePlayerLeaf();
 	}
 })
-
 
 // ---------------------------- //
 // ---  SPARSE 1/5s UPDATE  --- //
