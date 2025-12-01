@@ -940,8 +940,8 @@ function addCharacterShadow(who) {
 		pos(0,0),
 		anchor('center'),
 		z(LAYERS.ground + 1),
-		scale(2.34),
-		opacity(0.275),
+		scale(2.3),
+		opacity(0.25),
 		'characterShadow',
 	])
 }
