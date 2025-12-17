@@ -624,7 +624,7 @@ function attack(data) {
 	
 	for (let n = 0; n < bulletCount; n++) {
 		let relativeSpread = Math.floor(bulletCount / 2);
-		let bAngle = s.angle += rand(-BULLET_SPREAD, BULLET_SPREAD);
+		let bAngle = s.angle + rand(-BULLET_SPREAD, BULLET_SPREAD);
 		if (bInfo.special.count) bAngle += (n - relativeSpread) * bInfo.special.spread / relativeSpread / 2;
 
 		let spriteName = data.type;
@@ -914,21 +914,20 @@ function updatePlayerLeaf() {
 		else { pa -= 360; }
 	}
 
-	let diff = a - pa
+	let diff = a - pa;
 
-	let start = 20;
-	let end = 60;
-	let topSpeed = 5;
-	
-	let newTarget = clamp(
-		map(
-			Math.abs(diff),
-			0, topSpeed, start, end
-		),
-		start, end
+	//debug.log(`${Math.floor(Math.abs(diff))} ... ${Math.round(playerLeaf.targetRotation)}`);
+
+	let maxAngle = 80;
+	let topSpeed = 10;
+
+	let newTarget = mapc(
+		Math.abs(diff),
+		0, topSpeed, 
+		0, maxAngle,
 	);
+	
 	newTarget *= -Math.sign(diff);
-
 	playerLeaf.targetRotation = newTarget;
 }
 
@@ -1064,11 +1063,8 @@ gameScene.onButtonDown('shoot', () => {
 
 gameScene.onMouseMove(() => {
 	if (!isFreezeFrame()) {
-		player.prevAngle = player.angle;
-
 		player.angle = toWorld(mousePos()).angle(player.pos) - 90;
 		updatePlayerGlisten();
-		updatePlayerLeaf();
 	}
 })
 
@@ -1208,6 +1204,11 @@ gameScene.onUpdate(() => {
 
 		processKnockback(player);
 
+		// Player leaf updates
+
+		updatePlayerLeaf();
+		player.prevAngle = player.angle;
+
 		// Player border resolution
 
 		player.pos = borderResolve(player.pos);
@@ -1240,7 +1241,7 @@ gameScene.onUpdate(() => {
 
 		// Player visual effects
 
-		playerLeaf.angle = decay(playerLeaf.angle, playerLeaf.targetRotation, 10);
+		playerLeaf.angle = decay(playerLeaf.angle, playerLeaf.targetRotation, 20);
 
 		
 		gameScene.get('bullet').forEach((b) => {
