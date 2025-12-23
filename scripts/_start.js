@@ -17,7 +17,7 @@ kaboom({
 	width: kaWidth,
 	height: kaHeight,
 	letterbox: true,
-	pixelDensity: 1,
+	pixelDensity: Math.min(devicePixelRatio, 2),
 	logMax: 3,
 	debugKey: 'i',
 	texFilter: 'linear',
