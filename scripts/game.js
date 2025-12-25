@@ -298,6 +298,7 @@ abilityFillingMask.add([
 	scale(UNIT / 150 * 1.5),
 	fixed(),
 	z(LAYERS.ui),
+	opacity(0.3),
 ])
 
 // Red full icon

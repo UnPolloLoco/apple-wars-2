@@ -17,7 +17,7 @@ kaboom({
 	width: kaWidth,
 	height: kaHeight,
 	letterbox: true,
-	pixelDensity: Math.min(devicePixelRatio, 2),
+	pixelDensity: 0.5*Math.min(devicePixelRatio, 2),
 	logMax: 3,
 	debugKey: 'i',
 	texFilter: 'linear',
@@ -89,27 +89,7 @@ loadSprite('bul_strawberrySeed', 'https://iili.io/KtHgKzb.png');
 loadSprite('enemy', 'https://iili.io/KN8fNPs.png')
 loadSprite('shadow', 'https://iili.io/fCyT2Cg.png')
 
-loadSpriteAtlas('https://iili.io/fBRKXRt.png', {
-	'bulletSlot_primary': { x: 1, y: 1, width: 115, height: 115 },
-	'bulletSlot_transition': { x: 118, y: 1, width: 115, height: 115 },
-	'bulletSlot_secondary': { x: 235, y: 1, width: 115, height: 115 },
-})
-
 loadRoot('https://unpolloloco.github.io/apple-wars-2/assets/');
-
-loadSpriteAtlas('sprites/ui.png', {
-	'abilityMeter_full': { x: 1, y: 1, width: 150, height: 159 },
-	'abilityMeter_empty': { x: 153, y: 1, width: 150, height: 159 },
-	'abilityMeter_filling': { x: 305, y: 1, width: 150, height: 159 },
-	
-	'healthBar_full': { x: 1, y: 162, width: 600, height: 100 },
-	'healthBar_empty': { x: 1, y: 264, width: 600, height: 100 },
-	'healthBar_flash': { x: 1, y: 366, width: 600, height: 100 },
-	
-	//'bulletSlot_primary': { x: 1, y: 468, width: 115, height: 115 },
-	//'bulletSlot_transition': { x: 118, y: 468, width: 95, height: 95 },
-	//'bulletSlot_secondary': { x: 215, y: 468, width: 75, height: 75 },
-})
 
 loadSpriteAtlas('sprites/apple.png', {
 	'apple_base': { x: 1, y: 1, width: 85, height: 85 },
@@ -120,6 +100,23 @@ loadSpriteAtlas('sprites/apple.png', {
 	},
 	
 	'apple_glisten': { x: 1, y: 89, width: 320, height: 64, sliceX: 5 },
+})
+
+loadSpriteAtlas('sprites/ui.png', {
+	'healthBar_empty': { x: 1, y: 1, width: 600, height: 100 },
+	'healthBar_full': { x: 1, y: 103, width: 600, height: 100 },
+	'healthBar_flash': { x: 1, y: 205, width: 600, height: 100 },
+	'healthBar_end1': { x: 1, y: 307, width: 600, height: 100 },
+	'healthBar_end2': { x: 1, y: 409, width: 600, height: 100 },
+	'healthBar_end3': { x: 1, y: 511, width: 600, height: 100 },
+	
+	'abilityMeter_empty': { x: 1, y: 613, width: 150, height: 159 },
+	'abilityMeter_full': { x: 153, y: 613, width: 150, height: 159 },
+	'abilityMeter_filling': { x: 305, y: 613, width: 150, height: 159 },
+
+	'bulletSlot_primary': { x: 1, y: 774, width: 115, height: 115 },
+	'bulletSlot_transition': { x: 118, y: 774, width: 115, height: 115 },
+	'bulletSlot_secondary': { x: 235, y: 774, width: 115, height: 115 },
 })
 
 loadSprite('spurt', 'sprites/spurt.png', {
