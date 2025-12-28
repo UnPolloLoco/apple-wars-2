@@ -880,7 +880,7 @@ function updateHealthBar() {
 			0.3,
 			(w) => {
 				healthBarFlashMask.width = w;
-				healthBarShadowMask.width = w + UNIT*0.08; // size of health bar shadow (0.14 is inner layer thickness)
+				healthBarShadowMask.width = w + UNIT*0.05; // size of health bar shadow (0.14 is inner layer thickness)
 			},
 			easings.easeOutCubic
 		);

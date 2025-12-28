@@ -17,7 +17,7 @@ kaboom({
 	width: kaWidth,
 	height: kaHeight,
 	letterbox: true,
-	pixelDensity: 0.5*Math.min(devicePixelRatio, 2),
+	pixelDensity: Math.min(devicePixelRatio, 2),
 	logMax: 3,
 	debugKey: 'i',
 	texFilter: 'linear',
@@ -159,6 +159,7 @@ loadShader(
 
 	vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
 		vec4 c = def_frag();
+		return vec4(0,0,0, c.a);
 		//float gray = 0.1765;
 		float gray = 0.0;
 
