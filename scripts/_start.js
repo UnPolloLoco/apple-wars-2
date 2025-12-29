@@ -77,6 +77,8 @@ const BULLET_SLOT_STANDARD_SCALE = UNIT / 115 * 1.15;
 const BULLET_ICON_STANDARD_SCALE = UNIT * 0.7;
 const BULLET_SECONDARY_DISPLAY_SCALE_MULTI = 65/115; // Don't mess with the magic number
 
+const LEAF_MOVEMENT_BIAS_MULTI = 0.4;
+
 
 // Sprite padding is one pixel on the border, and two pixels between sprites.
 // Specify 1px padding when combining individual drawings, 0px when combining spritesheets

@@ -917,8 +917,6 @@ function updatePlayerLeaf() {
 
 	let diff = a - pa;
 
-	//debug.log(`${Math.floor(Math.abs(diff))} ... ${Math.round(playerLeaf.targetRotation)}`);
-
 	let maxAngle = 80;
 	let topSpeed = 10;
 
@@ -927,8 +925,32 @@ function updatePlayerLeaf() {
 		0, topSpeed, 
 		0, maxAngle,
 	);
+
+	let movementBiasOffset = 0;
+	let angleBasedMulti = 0;
+
+	// Rotate leaf based on player movement
+	if (player.moveVec.x != 0 || player.moveVec.y != 0) {
+		// If player is moving
+		let biasTowardAngle = player.moveVec.scale(1, -1).angle()// + 180;
+		
+		let a = (-90 - player.angle);
+		let b = biasTowardAngle;
+
+		if (Math.abs(a - b) > 180) {
+			if (a > b) { b += 360; } 
+			else { b -= 360; }
+		}
+
+		//movementBiasOffset = (-90 - player.angle) - biasTowardAngle;
+		movementBiasOffset = a - b;
+
+		angleBasedMulti = clamp(2 - Math.abs(movementBiasOffset)/90, 0,1);
+	}
+
 	
 	newTarget *= -Math.sign(diff);
+	newTarget += movementBiasOffset * LEAF_MOVEMENT_BIAS_MULTI * angleBasedMulti;
 	playerLeaf.targetRotation = newTarget;
 }
 
