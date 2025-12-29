@@ -66,7 +66,6 @@ const CAMERA_ZOOM_MAGNITUDE = 0.07;
 const CAMERA_SHIFT_SPEED = 15;
 const CAMERA_SHIFT_MAGNITUDE = 0.1;
 
-const ARENA_DIMENSIONS = [8,6];
 const ARENA_TILE_SIZE = 5;
 
 const BULLET_ICON_EQUIPPED_Z = 0; // Desired z layer of a bullet slot/icon depending on if it's active or not

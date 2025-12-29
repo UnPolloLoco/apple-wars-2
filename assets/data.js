@@ -1,3 +1,5 @@
+// ----------------------------------------------- BULLETS -----------------------------------------------
+
 /*
 	name:		pretty title
 	damage:		damage
@@ -71,6 +73,8 @@ const BULLETS = {
 	},
 }
 
+// ----------------------------------------------- ENEMIES -----------------------------------------------
+
 /*
 	seeds:		all potential weapons	[USELESS FOR NOW]
 	speed:		UNITS / sec
@@ -117,5 +121,27 @@ const ENEMIES = {
 		scale:		0.85,
 		aimSkill:	0,
 		kbMulti:	1,
+	},
+}
+
+// ----------------------------------------------- ZONES -----------------------------------------------
+
+/*
+	bounds:		[ [start x, start y], [width, height] ... ] (UNITS)
+	spawn:		[x, y] (UNITS)
+*/
+
+const ZONES = {
+	camp: {
+		spawn:		[2,2],
+		bounds:		[
+			[[0,0], [4,4]],
+		],
+	},
+	arena1: {
+		spawn:		[4,3],
+		bounds:		[
+			[[0,0], [8,6]],
+		],
 	},
 }

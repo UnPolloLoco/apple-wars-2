@@ -18,6 +18,7 @@ For when memory fails...
 - *"Bullet display"*: Bullet selector/indicator on game UI
 - *"Bullet display slot"*: Background disc on bullet display
 - *"Bullet display icon"*: Bullet sprite on bullet display
+- *"Zone"*: The area a player is in; not a physically different place, just different visuals
 
 &nbsp;
 
@@ -28,6 +29,7 @@ For when memory fails...
 - `ally`: Will not attack player; includes player
 - `enemy`: Will attack player
 - `bullet`: Is a bullet
+- `zoneSpecific`: Something (enemy, bullet, NOT PLAYER) that should be destroyed when going between zones
 
 &nbsp;
 
@@ -50,10 +52,10 @@ For when memory fails...
 
 &nbsp;
 
-**`LOCATION`**: Where the player is
+**`LOCATION`**: Which ZONE the player is in
 - *String*
 - `camp`: At camp; no enemies spawn
-- `level#`: In battle (ex. 'level1')
+- `arena#`: In battle (ex. 'arena1')
 
 &nbsp;
 

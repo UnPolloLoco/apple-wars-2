@@ -29,7 +29,7 @@ const GAME_STATUS = {
 	STATE: 'normal',
 	IS_SWITCHING_BULLETS: false,
 
-	LOCATION: 'level1',
+	LOCATION: 'arena1',
 	PHASE: {
 		NAME: 't1',
 		TIME: 0,
@@ -44,11 +44,32 @@ const ui = 		    add([ z(2), timer(), ]);
 var totaldmg = 0; var totalPsn = 0;
 
 // ------------------------- //
-// ---   INITIAL SETUP   --- //
+// ---   AREA LOADING?   --- //
 // ------------------------- //
 
-let arenaWidth = ARENA_DIMENSIONS[0];
-let arenaHeight = ARENA_DIMENSIONS[1];
+function zoneData() {
+	return ZONES[GAME_STATUS.LOCATION];
+}
+
+function goToZone(name) {
+	GAME_STATUS.LOCATION = name;
+	get('zoneSpecific', {recursive: true}).forEach((x) => {
+		destroy(x);
+	})
+
+	let zd = zoneData();
+
+	addGrassTiles(zd.bounds[0]);
+	player.pos = Vec2.fromArray(zd.spawn).scale(UNIT * ARENA_TILE_SIZE).add(UNIT/9, -UNIT/9);
+}
+
+onKeyPress('l', () => { 
+	goToZone('camp');
+});
+
+// ------------------------- //
+// ---   INITIAL SETUP   --- //
+// ------------------------- //
 
 // Backing rectangle
 
@@ -64,45 +85,53 @@ gameScene.add([
 
 // Grass tiles
 
-for (let x = 0; x < arenaWidth; x++) {
-	for (let y = 0; y < arenaHeight; y++) {
-		let frameNum = 4;
+function addGrassTiles(bounds) {
+	get('grass', {recursive: true}).forEach((x) => {
+		destroy(x);
+	})
 
-		let isTop =   y == 0;
-		let isBot =   y == arenaHeight - 1;
-		let isLeft =  x == 0;
-		let isRight = x == arenaWidth - 1;
+	let arenaWidth = bounds[1][0];
+	let arenaHeight = bounds[1][1];
 
-		if (isTop) {
-			if (isLeft) 		{ frameNum = 0 }
-			else if (isRight)	{ frameNum = 2 }
-			else				{ frameNum = 1 }
-		} else if (isBot) {
-			if (isLeft) 		{ frameNum = 6 }
-			else if (isRight)	{ frameNum = 8 }
-			else				{ frameNum = 7 }
-		} else {
-			if (isLeft) 		{ frameNum = 3 }
-			else if (isRight)	{ frameNum = 5 }
-			else				{ frameNum = 4 }
+	for (let x = 0; x < arenaWidth; x++) {
+		for (let y = 0; y < arenaHeight; y++) {
+			let frameNum = 4;
+
+			let isTop =   y == 0;
+			let isBot =   y == arenaHeight - 1;
+			let isLeft =  x == 0;
+			let isRight = x == arenaWidth - 1;
+
+			if (isTop) {
+				if (isLeft) 		{ frameNum = 0 }
+				else if (isRight)	{ frameNum = 2 }
+				else				{ frameNum = 1 }
+			} else if (isBot) {
+				if (isLeft) 		{ frameNum = 6 }
+				else if (isRight)	{ frameNum = 8 }
+				else				{ frameNum = 7 }
+			} else {
+				if (isLeft) 		{ frameNum = 3 }
+				else if (isRight)	{ frameNum = 5 }
+				else				{ frameNum = 4 }
+			}
+
+			gameScene.add([
+				sprite('grass', { frame: frameNum }),
+				pos(
+					UNIT*ARENA_TILE_SIZE * x,
+					UNIT*ARENA_TILE_SIZE * y,
+				),
+				scale(UNIT/400 * ARENA_TILE_SIZE),
+				offscreen({ 
+					hide: true,
+					distance: UNIT * ARENA_TILE_SIZE * 1.5,
+				}),
+				z(LAYERS.ground),
+				//color(rgb(55, 135, 255)),
+				"grass"
+			])
 		}
-
-		gameScene.add([
-			sprite('grass', { frame: frameNum }),
-			pos(
-				UNIT*ARENA_TILE_SIZE * (x - arenaWidth/2 + 0.5),
-				UNIT*ARENA_TILE_SIZE * (y - arenaHeight/2 + 0.5),
-			),
-			scale(UNIT/400 * ARENA_TILE_SIZE),
-			offscreen({ 
-				hide: true,
-				distance: UNIT * ARENA_TILE_SIZE,
-			}),
-			anchor('center'),
-			z(LAYERS.ground),
-			//color(rgb(55, 135, 255)),
-			"grass"
-		])
 	}
 }
 
@@ -167,6 +196,10 @@ const playerLeaf = player.add([
 
 addCharacterShadow(player);
 
+// Go to proper zone
+
+goToZone('arena1');
+
 
 // --------------------- //
 // ---      UI       --- //
@@ -191,7 +224,9 @@ const bulletDisplaySlot = ui.add([
 	}
 ])
 
-// NOTE, 'secondary' just means it STARTS unequipped, it will be called 'secondary' even if it's the main active bullet
+// NOTE!! 'secondary' just means it STARTS unequipped, it will be 
+// called 'secondary' even if it's the main active bullet
+
 const bulletDisplaySlotSecondary = ui.add([
 	pos(bulletDisplaySlot.pos.add(
 		UNIT * 0.525, 
@@ -589,6 +624,7 @@ function summonEnemy(data) {
 			z(LAYERS.players - 5),
 			"character",
 			"enemy",
+			"zoneSpecific",
 			{
 				approachDistance:	rand(3,4.5),
 				nextShootTime:		0,
@@ -640,6 +676,7 @@ function attack(data) {
 			z(LAYERS.players - 6),
 			timer(),
 			"bullet",
+			"zoneSpecific",
 			{
 				source:      s,
 				info:        bInfo,
@@ -726,6 +763,7 @@ function bulletCollision(b, c) {
 			anchor(vec2(-0.333, 0)),
 			z(LAYERS.players - 10),
 			color(255, 250, 190),
+			"zoneSpecific",
 		])
 		spurt.onAnimEnd(() => { destroy(spurt); });
 
@@ -827,20 +865,24 @@ function processKnockback(c) {
 // Border wall
 
 function borderResolve(p) {
-	let borderX = (arenaWidth - 0.15) * UNIT * ARENA_TILE_SIZE / 2;
-	let borderY = (arenaHeight - 0.15) * UNIT * ARENA_TILE_SIZE / 2;
+	let bounds = zoneData().bounds[0];
+	//let borderExtra = 0.15;
+
+	let start = Vec2.fromArray(bounds[0]).scale(UNIT * ARENA_TILE_SIZE);
+	let end = Vec2.fromArray(bounds[1]).scale(UNIT * ARENA_TILE_SIZE).add(start);
+	
 	let newPos = p;
 
-	if (p.x > borderX) { // x
-		newPos.x = borderX;
-	} else if (p.x < -borderX) {
-		newPos.x = -borderX;
+	if (p.x > end.x) { // x
+		newPos.x = end.x;
+	} else if (p.x < start.x) {
+		newPos.x = start.x;
 	}
 
-	if (p.y > borderY) { // y
-		newPos.y = borderY;
-	} else if (p.y < -borderY) {
-		newPos.y = -borderY;
+	if (p.y > end.y) { // y
+		newPos.y = end.y;
+	} else if (p.y < start.y) {
+		newPos.y = start.y;
 	}
 
 	return newPos;
@@ -1367,6 +1409,7 @@ gameScene.onUpdate(() => {
 			debug.log(`
 				objs:  ${debug.numObjects()} (${on}/${onOffTotal})
 				draw:  ${debug.drawCalls()}
+				ppos:  ${(player.pos.scale(1/UNIT))}
 			`);
 		}
 
