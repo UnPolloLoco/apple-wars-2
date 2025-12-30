@@ -781,7 +781,7 @@ function bulletCollision(b, c) {
 				// freeze frame doesnt extend dmg flash :(
 				setFreezeFrame(0.12);
 				shake(UNIT / 24);
-				setCamScale(getCamScale().scale(1.05))
+				setCamScale(1.06)
 			}
 
 			// Poison
