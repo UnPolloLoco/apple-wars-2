@@ -122,7 +122,7 @@ loadSpriteAtlas('sprites/ui.png', {
 
 loadSprite('spurt', 'sprites/spurt.png', {
 	sliceY: 5,
-	anims: { 'spurt': { from: 0, to: 4, speed: 30 } },
+	anims: { 'spurt': { from: 0, to: 4, speed: 25 } },
 })
 
 loadSprite('grass', 'sprites/grass.png', {

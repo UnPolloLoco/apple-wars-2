@@ -128,7 +128,8 @@ function addGrassTiles(bounds) {
 					distance: UNIT * ARENA_TILE_SIZE * 1.5,
 				}),
 				z(LAYERS.ground),
-				//color(rgb(55, 135, 255)),
+				color(rgb(160, 220, 255)),
+				// color(rgb(55, 135, 255)),
 				"grass"
 			])
 		}
@@ -774,6 +775,14 @@ function bulletCollision(b, c) {
 		} else {
 			// Impact effects (NON-LETHAL ONLY)
 			damageFlash(c, 'basic');
+
+			// Player-only impact effects
+			if (c == player) {
+				// freeze frame doesnt extend dmg flash :(
+				setFreezeFrame(0.12);
+				shake(UNIT / 24);
+				setCamScale(getCamScale().scale(1.05))
+			}
 
 			// Poison
 			if (b.info.special.poison) {
