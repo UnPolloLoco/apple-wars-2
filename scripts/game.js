@@ -116,8 +116,8 @@ function addGrassTiles(bounds) {
 				else				{ frameNum = 4 }
 			}
 
-			gameScene.add([
-				sprite('grass', { frame: frameNum }),
+			let g = gameScene.add([
+				sprite(GAME_STATUS.LOCATION == 'camp' ? 'grassPath' : 'grass', { frame: frameNum }),
 				pos(
 					UNIT*ARENA_TILE_SIZE * x,
 					UNIT*ARENA_TILE_SIZE * y,
@@ -128,10 +128,10 @@ function addGrassTiles(bounds) {
 					distance: UNIT * ARENA_TILE_SIZE * 1.5,
 				}),
 				z(LAYERS.ground),
-				color(rgb(160, 220, 255)),
-				// color(rgb(55, 135, 255)),
 				"grass"
 			])
+
+			if (GAME_STATUS.LOCATION != 'camp') g.use(color(rgb(160, 220, 255)));
 		}
 	}
 }
@@ -277,11 +277,13 @@ const bulletDisplayIconSecondary = ui.add([
 
 let db = DATA.bullets;
 
-bulletDisplayIcon.sprite = `bul_${db[0]}`;
+// bulletDisplayIcon.sprite = `bul_${db[0]}`;
+bulletDisplayIconSecondary.use(sprite(`bul_${db[0]}`));
 bulletDisplayIcon.spriteScale = BULLETS[db[0]].size;
 bulletDisplayIcon.scale = vec2(BULLET_ICON_STANDARD_SCALE / bulletDisplayIcon.spriteScale);
 
-bulletDisplayIconSecondary.sprite = `bul_${db[1]}`;
+// bulletDisplayIconSecondary.sprite = `bul_${db[1]}`;
+bulletDisplayIconSecondary.use(sprite(`bul_${db[1]}`));
 bulletDisplayIconSecondary.spriteScale = BULLETS[db[1]].size;
 bulletDisplayIconSecondary.scale = vec2(BULLET_ICON_STANDARD_SCALE * BULLET_SECONDARY_DISPLAY_SCALE_MULTI / bulletDisplayIconSecondary.spriteScale);
 
@@ -586,10 +588,12 @@ function summonEnemyWave() {
 		eType = 'swift';
 	}
 
-	summonEnemy({
-		type:  eType, 
-		count: Math.floor(baseCount * (1 + gameTime() / 75)),
-	});
+	if (GAME_STATUS.LOCATION != 'camp' && GAME_STATUS.STATE == 'normal') {
+		summonEnemy({
+			type:  eType, 
+			count: Math.floor(baseCount * (1 + gameTime() / 75)),
+		});
+	}
 
 	let delay = 10 - Math.min(9, gameTime()/15);
 
@@ -781,7 +785,7 @@ function bulletCollision(b, c) {
 				// freeze frame doesnt extend dmg flash :(
 				setFreezeFrame(0.12);
 				shake(UNIT / 24);
-				setCamScale(1.06)
+				setCamScale(1.04)
 			}
 
 			// Poison
@@ -1067,9 +1071,15 @@ function swapSelectedBullet() {
 					thisIcon.scale.y = map(t,0,1, initialInfo.iconScale.y, targetInfo.iconScale.y) / thisIcon.spriteScale;
 
 					if (willBeMainSlot) {
-						thisSlot.sprite = spriteList[clamp(2 - Math.floor(t*3), 0,2)];
+						//thisSlot.sprite = spriteList[clamp(2 - Math.floor(t*3), 0,2)];
+						thisSlot.use(sprite(
+							spriteList[clamp(2 - Math.floor(t*3), 0,2)]
+						));
 					} else {
-						thisSlot.sprite = spriteList[clamp(Math.floor(t*3), 0,2)];
+						//thisSlot.sprite = spriteList[clamp(Math.floor(t*3), 0,2)];
+						thisSlot.use(sprite(
+							spriteList[clamp(Math.floor(t*3), 0,2)]
+						));
 					}
 				},
 				easings.easeInOutQuad,

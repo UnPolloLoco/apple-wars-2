@@ -133,9 +133,9 @@ const ENEMIES = {
 
 const ZONES = {
 	camp: {
-		spawn:		[1,1],
+		spawn:		[2,2],
 		bounds:		[
-			[[0,0], [2,2]],
+			[[0,0], [4,4]],
 		],
 	},
 	arena1: {

@@ -90,6 +90,11 @@ loadSprite('bul_strawberrySeed', 'https://iili.io/KtHgKzb.png');
 loadSprite('enemy', 'https://iili.io/KN8fNPs.png')
 loadSprite('shadow', 'https://iili.io/fCyT2Cg.png')
 
+loadSprite('grassPath', 'https://iili.io/fXux9Qs.png', {
+	sliceX: 3,
+	sliceY: 3,
+});
+
 loadRoot('https://unpolloloco.github.io/apple-wars-2/assets/');
 
 loadSpriteAtlas('sprites/apple.png', {
