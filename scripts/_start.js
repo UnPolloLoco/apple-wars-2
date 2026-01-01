@@ -89,6 +89,9 @@ loadSprite('bul_appleSeed', 'https://iili.io/KN8qlz7.png');
 loadSprite('bul_strawberrySeed', 'https://iili.io/KtHgKzb.png');
 loadSprite('enemy', 'https://iili.io/KN8fNPs.png')
 loadSprite('shadow', 'https://iili.io/fCyT2Cg.png')
+loadSprite('tree', 'https://iili.io/fXQBa5b.png')
+loadSprite('altar', 'https://iili.io/fhYwwHQ.png')
+loadSprite('tent', 'https://iili.io/fhYO4up.png')
 
 loadSprite('grassPath', 'https://iili.io/fXux9Qs.png', {
 	sliceX: 3,

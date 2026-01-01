@@ -61,6 +61,37 @@ function goToZone(name) {
 
 	addGrassTiles(zd.bounds[0]);
 	player.pos = Vec2.fromArray(zd.spawn).scale(UNIT * ARENA_TILE_SIZE).add(UNIT/9, -UNIT/9);
+
+	// Set up zone decoration
+
+	let deco = zd.deco;
+
+	for (let n = 0; n < deco.length; n++) {
+		let thisSet = deco[n];
+		for (let i = 0; i < thisSet.list.length; i++) {
+			let thisItem = thisSet.list[i];
+			let itemData = {...(thisSet.all), ...thisItem}
+
+			let itemAngle = itemData.angle;
+			if (itemAngle == 'random') {
+				randSeed(itemData.pos[0] + itemData.pos[1]*100);
+				itemAngle = rand(360);
+			}
+
+			// Add zone decoration
+
+			add([
+				sprite(thisSet.sprite),
+				pos(
+					itemData.pos[0] * UNIT * ARENA_TILE_SIZE, 
+					itemData.pos[1] * UNIT * ARENA_TILE_SIZE),
+				rotate(itemAngle),
+				scale(UNIT * itemData.scale),
+				z(LAYERS.ground + 5),
+				"zoneSpecific",
+			])
+		}
+	}
 }
 
 onKeyPress('l', () => { 
@@ -785,7 +816,7 @@ function bulletCollision(b, c) {
 				// freeze frame doesnt extend dmg flash :(
 				setFreezeFrame(0.12);
 				shake(UNIT / 24);
-				setCamScale(1.04)
+				setCamScale(1.03);
 			}
 
 			// Poison

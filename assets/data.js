@@ -127,21 +127,81 @@ const ENEMIES = {
 // ----------------------------------------------- ZONES -----------------------------------------------
 
 /*
-	bounds:		[ [start x, start y], [width, height] ... ] (UNITS)
-	spawn:		[x, y] (UNITS)
+	bounds:		[ 
+					[ [pos], [size] ],		(ARENA TILES)
+					... 
+				]
+
+	spawn:		[pos] (ARENA TILES)
+
+	deco:		[
+					{
+						sprite:		which sprite gets placed
+						all:		default settings for everything in this section
+										same subitems as 'list'
+						list:		per-object settings such as position
+									[
+										{
+											pos:		[x, y] (ARENA TILES)
+											angle:		rotation (degrees) OR 'random' for *seeded* random
+											scale:		scale factor (UNITS)
+										},
+										...
+									]
+					},
+					...
+				]
 */
 
 const ZONES = {
+	// -------------- CAMP --------------
 	camp: {
 		spawn:		[2,2],
 		bounds:		[
 			[[0,0], [4,4]],
 		],
+		deco: [
+			{ 
+				sprite: 'tree',
+				all: {
+					angle: 'random',
+					scale: 7 / 200,
+				},
+				list: [
+					{ pos: [0,0] },
+					{ pos: [2,4] },
+				]
+			},
+			{ 
+				sprite: 'tent',
+				all: {
+					scale: 6 / 200,
+				},
+				list: [
+					{ pos: [-2,0], angle: 0 },
+				]
+			},
+			{ 
+				sprite: 'altar',
+				all: {},
+				list: [
+					{ 
+						pos: [3,0], 
+						angle: 0, 
+						scale: 4.5 / 200
+					},
+				]
+			},	
+		],
 	},
+	// -------------- ARENA 1 --------------
 	arena1: {
 		spawn:		[4,3],
 		bounds:		[
 			[[0,0], [8,6]],
+		],
+		deco: [
+
 		],
 	},
 }
