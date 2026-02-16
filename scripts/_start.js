@@ -51,9 +51,9 @@ const SUPER_KB_IMPACT_SPEED_MULTI = 0.8;
 const DAMAGE_FLASH = { r:1, g:1, b:1, strength:0.65 };
 const POISON_FLASH = { r:0.6, g:0.3, b:1, strength:0.85 };
 
-const DASH_COOLDOWN = 2;
+const DASH_COOLDOWN = 1.5;
 const DASH_DURATION = 0.2;
-const DASH_SPEED = 13;
+const DASH_SPEED = 15;
 
 const PASSIVE_HEAL_DELAY = 1.5; // Time after taking damage until healing starts
 const HEAL_RATE = 5;
@@ -64,7 +64,7 @@ const OFFSCREEN_DISTANCE = 2;
 const CAMERA_ZOOM_SPEED = 4;
 const CAMERA_ZOOM_MAGNITUDE = 0.07;
 const CAMERA_SHIFT_SPEED = 15;
-const CAMERA_SHIFT_MAGNITUDE = 0.1;
+const CAMERA_SHIFT_MAGNITUDE = 0.12;
 
 const ARENA_TILE_SIZE = 5;
 

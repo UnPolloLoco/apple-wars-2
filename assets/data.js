@@ -142,7 +142,7 @@ const ENEMIES = {
 						list:		per-object settings such as position
 									[
 										{
-											pos:		[x, y] (ARENA TILES)
+											pos:		center at [x, y] (ARENA TILES)
 											angle:		rotation (degrees) OR 'random' for *seeded* random
 											scale:		scale factor (UNITS)
 										},
@@ -158,7 +158,7 @@ const ZONES = {
 	camp: {
 		spawn:		[2,2],
 		bounds:		[
-			[[0,0], [4,4]],
+			[[0,0], [3,3]],
 		],
 		deco: [
 			{ 
@@ -168,8 +168,12 @@ const ZONES = {
 					scale: 7 / 200,
 				},
 				list: [
-					{ pos: [0,0] },
-					{ pos: [2,4] },
+					{ pos: [0.4, -0.3] }, // topleft
+					{ pos: [-0.5, 0.5] },
+
+					{ pos: [2.8, 0.3] }, // topright
+
+					{ pos: [3.1, 2.6] }, // botright
 				]
 			},
 			{ 
@@ -178,7 +182,7 @@ const ZONES = {
 					scale: 6 / 200,
 				},
 				list: [
-					{ pos: [-2,0], angle: 0 },
+					{ pos: [-0.4,1.3], angle: -90 },
 				]
 			},
 			{ 
@@ -186,9 +190,9 @@ const ZONES = {
 				all: {},
 				list: [
 					{ 
-						pos: [3,0], 
+						pos: [0.6, 0.8], 
 						angle: 0, 
-						scale: 4.5 / 200
+						scale: 3 / 200
 					},
 				]
 			},	

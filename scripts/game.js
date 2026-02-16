@@ -87,7 +87,8 @@ function goToZone(name) {
 					itemData.pos[1] * UNIT * ARENA_TILE_SIZE),
 				rotate(itemAngle),
 				scale(UNIT * itemData.scale),
-				z(LAYERS.ground + 5),
+				z(LAYERS.ground + 5 + (thisSet.sprite=='tree')),
+				anchor('center'),
 				"zoneSpecific",
 			])
 		}
@@ -107,7 +108,8 @@ onKeyPress('l', () => {
 gameScene.add([
 	pos(center()),
 	rect(width(), height()),
-	color(rgb(35, 105, 25)),
+	// color(rgb(35, 105, 25)),
+	color(rgb(23, 90, 27)),
 	scale(1.23),
 	anchor('center'),
 	fixed(),
@@ -163,6 +165,7 @@ function addGrassTiles(bounds) {
 			])
 
 			if (GAME_STATUS.LOCATION != 'camp') g.use(color(rgb(160, 220, 255)));
+			if (GAME_STATUS.LOCATION == 'camp') g.use(color(rgb(150, 150, 170)));
 		}
 	}
 }
