@@ -43,9 +43,8 @@ const ui = 		    add([ z(2), timer(), ]);
 
 var totaldmg = 0; var totalPsn = 0;
 
-// ------------------------- //
-// ---   AREA LOADING?   --- //
-// ------------------------- //
+
+// ----------------------------------------- ZONE LOADER -----------------------------------------
 
 function zoneData() {
 	return ZONES[GAME_STATUS.LOCATION];
@@ -99,9 +98,7 @@ onKeyPress('l', () => {
 	goToZone('camp');
 });
 
-// ------------------------- //
-// ---   INITIAL SETUP   --- //
-// ------------------------- //
+// ----------------------------------------- ADD GROUND -----------------------------------------
 
 // Backing rectangle
 
@@ -170,7 +167,7 @@ function addGrassTiles(bounds) {
 	}
 }
 
-// Summon player
+// ----------------------------------------- SUMMON PLAYER -----------------------------------------
 
 const player = gameScene.add([
 	sprite('apple_base'),
@@ -236,11 +233,10 @@ addCharacterShadow(player);
 goToZone('arena1');
 
 
-// --------------------- //
-// ---      UI       --- //
-// --------------------- //
+// ----------------------------------------- UI (GAME) -----------------------------------------
 
-// Bullet Displays
+
+// ----------- Bullet Slots -----------
 
 const bulletDisplaySlot = ui.add([
 	pos(UNIT*0.75, UNIT*0.75),
@@ -281,6 +277,8 @@ const bulletDisplaySlotSecondary = ui.add([
 	}
 ])
 
+// ----------- Bullet Icons -----------
+
 const bulletDisplayIcon = ui.add([
 	pos(bulletDisplaySlot.pos.add(UNIT * 1.15/2)),
 	sprite('bul_appleSeed'),
@@ -307,7 +305,7 @@ const bulletDisplayIconSecondary = ui.add([
 	}
 ])
 
-// Set bullet display icon sprite/scale
+// ----------- Bullet UI Data -----------
 
 let db = DATA.bullets;
 
@@ -335,7 +333,7 @@ for (let num = 0; num <= 1; num++) {
 }
 
 
-// Ability
+// ----------- Ability Meter -----------
 
 const abilityDisplay = ui.add([
 	pos(
@@ -384,7 +382,7 @@ const abilityFull = ui.add([
 	opacity(1),
 ])
 
-// Healthbar
+// ----------- Health Bar -----------
 
 const emptyHealthBar = ui.add([
 	pos(abilityDisplay.pos.add(
@@ -453,7 +451,7 @@ const healthBarFlash = healthBarFlashMask.add([
 	fixed(),
 ])
 
-// Health bar shadow
+// ----------- Health Bar Shadow -----------
 
 const healthBarShadowMask = ui.add([
 	pos(healthBarFlashMask.pos),
@@ -472,7 +470,7 @@ const healthBarShadow = healthBarShadowMask.add([
 	shader('healthBarShadow'),
 ])
 
-// Money counter
+// ----------- Money Counter -----------
 
 const moneyCounter = ui.add([
 	pos(bulletDisplaySlot.pos.add(
@@ -485,10 +483,9 @@ const moneyCounter = ui.add([
 	z(LAYERS.ui),
 ])
 
-// ------------------------ //
-// ---    PAUSE MENU    --- //
-// ------------------------ //
+// ----------------------------------------- UI (PAUSE) -----------------------------------------
 
+// Background
 pauseMenu.add([
 	pos(0),
 	rect(width(), height()),
@@ -500,8 +497,23 @@ pauseMenu.add([
 	}
 ])
 
-// "Pause" text
+// Options backdrop
 
+pauseMenu.add([
+	pos(width() - UNIT*1.25, 0),
+	rect(UNIT*7.5, height()),
+	anchor('topright'),
+	color(BLACK),
+	z(LAYERS.pause - 1),
+	fixed(),
+	{
+		targetOpacity: 0.5,
+	}
+])
+
+// ----------- Pause UI content -----------
+
+// "Pause" text
 const pauseLabel = pauseMenu.add([
 	pos(
 		width() - UNIT/2,
@@ -519,19 +531,6 @@ const pauseLabel = pauseMenu.add([
 	}
 ])
 
-// Options backdrop
-
-pauseMenu.add([
-	pos(width() - UNIT*1.25, 0),
-	rect(UNIT*7.5, height()),
-	anchor('topright'),
-	color(BLACK),
-	z(LAYERS.pause - 1),
-	fixed(),
-	{
-		targetOpacity: 0.5,
-	}
-])
 
 // Options buttons
 
@@ -565,17 +564,15 @@ pauseMenu.get('*').forEach((obj) => {
 	obj.use(opacity(0));
 })
 
-// ----------------------- //
-// ---    FUNCTIONS    --- //
-// ----------------------- //
+// ----------------------------------------- FUNCTIONS -----------------------------------------
 
-// Get game time
+// ----------- Get Game Time -----------
 
 function gameTime() {
 	return GAME_STATUS.GAME_TIME;
 }
 
-// Decay by time
+// ----------- Value Decay -----------
 
 function decay(start, end, speed) {
 	if (start.x != undefined) {
@@ -595,7 +592,7 @@ function decay(start, end, speed) {
 	}
 }
 
-// Freeze frame
+// ----------- Freeze Frame -----------
 
 function setFreezeFrame(duration) {
 	let newTime = time() + duration;
@@ -608,7 +605,7 @@ function isFreezeFrame() {
 	return time() < GAME_STATUS.FREEZE_FRAME_UNTIL;
 }
 
-// Enemy waves
+// ----------- Summon Wave of Enemies -----------
 
 function summonEnemyWave() {
 	let baseCount = 5;
@@ -635,7 +632,7 @@ function summonEnemyWave() {
 }
 summonEnemyWave();
 
-// Summon enemy
+// ----------- Summon Enemies -----------
 
 function summonEnemy(data) {
 	// data: {type, count}
@@ -683,7 +680,7 @@ function summonEnemy(data) {
 	}
 }
 
-// Attacking
+// ----------- Attack -----------
 
 function attack(data) {
 	// data = {source, type}
@@ -738,7 +735,7 @@ function attack(data) {
 	}
 }
 
-// Death 
+// ----------- Death -----------
 
 function death(victim) {
 	if (victim.is('superKb_entangler')) {
@@ -757,7 +754,7 @@ function death(victim) {
 	}
 }
 
-// Damage flash VFX
+// ----------- Damage Flash VFX -----------
 
 function damageFlash(victim, flashType) {
 	let flashData = {
@@ -769,7 +766,7 @@ function damageFlash(victim, flashType) {
 	gameScene.wait(0.1, () => { victim.unuse('shader') })
 }
 
-// Bullet collide function
+// ----------- Bullet Collision -----------
 
 function bulletCollision(b, c) {
 	if (c.is('enemy') != b.isFromEnemy && !b.hasHit.includes(c.id)) {
@@ -876,7 +873,7 @@ function bulletCollision(b, c) {
 	}
 }
 
-// Knockback
+// ----------- Knockback -----------
 
 function processKnockback(c) {
 	if (c.is('enemy')) {
@@ -909,7 +906,7 @@ function processKnockback(c) {
 	}
 }
 
-// Border wall
+// ----------- Resolve Positions to Border -----------
 
 function borderResolve(p) {
 	let bounds = zoneData().bounds[0];
@@ -935,7 +932,7 @@ function borderResolve(p) {
 	return newPos;
 }
 
-// Player healthbar
+// ----------- Update Health Bar -----------
 
 function updateHealthBar() {
 	healthBar.width = healthBar.maxWidth / 100 * player.health;
@@ -976,13 +973,13 @@ function updateHealthBar() {
 	}
 }
 
-// Player money display
+// ----------- Update Money Counter -----------
 
 function updateMoneyCounter() {
 	moneyCounter.text = `\$${Math.floor(DATA.money)}`;
 }
 
-// Player glisten effect
+// ----------- Update Player Glisten -----------
 
 function updatePlayerGlisten() {
 	playerGlisten.angle = -player.angle;
@@ -993,7 +990,7 @@ function updatePlayerGlisten() {
 	));
 }
 
-// Player leaf rotation
+// ----------- Update Player Leaf Rotation -----------
 
 function updatePlayerLeaf() {
 	let a = player.angle;
@@ -1043,7 +1040,7 @@ function updatePlayerLeaf() {
 	playerLeaf.targetRotation = newTarget;
 }
 
-// Give a character a shadow
+// ----------- Add Character Shadow -----------
 
 function addCharacterShadow(who) {
 	who.add([
@@ -1057,7 +1054,7 @@ function addCharacterShadow(who) {
 	])
 }
 
-// Swap bullet slots
+// ----------- Swap Active Bullet -----------
 
 function swapSelectedBullet() {
 	if (!GAME_STATUS.IS_SWITCHING_BULLETS) {
@@ -1129,9 +1126,7 @@ function swapSelectedBullet() {
 
 
 
-// ---------------------------- //
-// ---  EVENTS AND BUTTONS  --- //
-// ---------------------------- //
+// ----------------------------------------- MOUSE AND KEYS -----------------------------------------
 
 onButtonPress('pause', () => {
 	gameScene.paused = !gameScene.paused;
@@ -1177,7 +1172,7 @@ gameScene.onButtonDown('shoot', () => {
 	});
 })
 
-// Change player angle 
+// ----------- Player Points to Mouse -----------
 
 gameScene.onMouseMove(() => {
 	if (!isFreezeFrame()) {
@@ -1186,9 +1181,7 @@ gameScene.onMouseMove(() => {
 	}
 })
 
-// ---------------------------- //
-// ---  SPARSE 1/5s UPDATE  --- //
-// ---------------------------- //
+// ----------------------------------------- UPDATE (5 / SEC) -----------------------------------------
 
 gameScene.loop(0.2, () => {
 	// Check for offscreen 
@@ -1221,14 +1214,14 @@ gameScene.loop(0.2, () => {
 	}
 })
 
-// ---------------------------- //
-// ---  EVERY FRAME UPDATE  --- //
-// ---------------------------- //
+// ----------------------------------------- UPDATE (EVERY FRAME) -----------------------------------------
 
 
 gameScene.onUpdate(() => {
 
 	if (!isFreezeFrame()) {
+
+		// ----------- For All ENEMIES -----------
 
 		gameScene.get('enemy').forEach((c) => {
 
@@ -1257,7 +1250,7 @@ gameScene.onUpdate(() => {
 			let angle = target.angle(c.pos) - 90;
 			c.angle = angle;
 
-			// Enemy movement
+			// Enemy movement 
 
 			if (!c.is('superKb_victim') && distanceToPlayer > (UNIT * c.approachDistance)**2) {
 				c.pos = c.pos.add(
@@ -1269,7 +1262,7 @@ gameScene.onUpdate(() => {
 
 			processKnockback(c);
 			
-			// Enemy attack
+			// Enemy attack 
 
 			if (gameTime() > c.nextShootTime && distanceToPlayer < (UNIT * 5)**2) {
 				attack({
@@ -1278,10 +1271,14 @@ gameScene.onUpdate(() => {
 				});
 			}
 		})
+
+		// END OF EVERY ENEMY
 		
-		// Player movement controls
+		// ----------- Player -----------
 		
 		if (player.state == 'normal') {
+			// Player movement controls
+
 			let w = isButtonDown('up');
 			let a = isButtonDown('left');
 			let s = isButtonDown('down');
@@ -1296,7 +1293,7 @@ gameScene.onUpdate(() => {
 				if (d) newMoveVec = newMoveVec.add(1, 0);
 			}
 			
-			// Player movement
+			// Player positioning
 			
 			player.moveVec = newMoveVec.unit();
 
@@ -1311,7 +1308,8 @@ gameScene.onUpdate(() => {
 			);
 
 		} else if (player.state == 'dashing') {
-			// Dash movement
+
+			// Player dash
 
 			player.pos = player.pos.add(
 				player.lastMoveVec.scale(
@@ -1319,6 +1317,8 @@ gameScene.onUpdate(() => {
 				)
 			)
 		}
+
+		// Process Knockback
 
 		processKnockback(player);
 
@@ -1361,6 +1361,8 @@ gameScene.onUpdate(() => {
 
 		playerLeaf.angle = decay(playerLeaf.angle, playerLeaf.targetRotation, 20);
 
+
+		// ----------- For All BULLETS -----------
 		
 		gameScene.get('bullet').forEach((b) => {
 			
@@ -1398,6 +1400,9 @@ gameScene.onUpdate(() => {
 			}
 		})
 
+
+		// ----------- For All POISONED CHARACTERS -----------
+
 		// Poison control (get it??)
 
 		gameScene.get('poisoned').forEach((c) => {
@@ -1425,7 +1430,9 @@ gameScene.onUpdate(() => {
 			}
 		})
 
-		// Camera effects
+		// END OF ALL POISONED
+
+		// ----------- Camera Controls -----------
 
 		let targetCamScale = 1 - isMouseDown() * CAMERA_ZOOM_MAGNITUDE;
 		let targetCamOffset = mousePos().sub(center()).scale(CAMERA_SHIFT_MAGNITUDE);
@@ -1448,11 +1455,11 @@ gameScene.onUpdate(() => {
 		GAME_STATUS.CURRENT_CAM_SHIFT = nextCamOffset;
 		setCamPos(player.pos.add(nextCamOffset));
 
-		// Update time
+		// ----------- Miscellaneous -----------
 
 		if (!gameScene.paused) GAME_STATUS.GAME_TIME += dt();
 
-		// Debug info
+		// ----------- Debugging -----------
 
 		if (debug.inspect) {
 			let on = GAME_STATUS.CHAR_ONSCREEN;
@@ -1474,7 +1481,6 @@ gameScene.onUpdate(() => {
 	};
 })
 
-// End of scene
-});
+}); // End of scene
 
 go('game');
