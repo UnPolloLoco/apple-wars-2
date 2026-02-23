@@ -728,6 +728,25 @@ function attack(data) {
 		bullet.lifeTimer = bullet.wait(2.5, () => { destroy(bullet); });
 	}
 
+	// Jiggle
+
+	s.scale.x /= ATTACK_JIGGLE_MULTI;
+	s.scale.y *= ATTACK_JIGGLE_MULTI;
+
+	wait(0.06, () => {
+		s.scale.x *= ATTACK_JIGGLE_MULTI;
+		s.scale.y /= ATTACK_JIGGLE_MULTI;
+
+		s.scale.x *= ATTACK_JIGGLE_MULTI;
+		s.scale.y /= ATTACK_JIGGLE_MULTI;
+	})
+	wait(0.13, () => {
+		s.scale.x /= ATTACK_JIGGLE_MULTI;
+		s.scale.y *= ATTACK_JIGGLE_MULTI;
+	})
+
+	// Attack cooldown
+
 	if (s.is('enemy')) {
 		s.nextShootTime = gameTime() + 0.8;
 	} else {

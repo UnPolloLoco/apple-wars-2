@@ -51,6 +51,8 @@ const SUPER_KB_IMPACT_SPEED_MULTI = 0.8;
 const DAMAGE_FLASH = { r:1, g:1, b:1, strength:0.65 };
 const POISON_FLASH = { r:0.6, g:0.3, b:1, strength:0.85 };
 
+const ATTACK_JIGGLE_MULTI = 0.96;
+
 const DASH_COOLDOWN = 1.5;
 const DASH_DURATION = 0.2;
 const DASH_SPEED = 15;
