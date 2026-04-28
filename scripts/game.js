@@ -614,7 +614,7 @@ function summonEnemyWave() {
 	if (rand() < 0.2) {
 		baseCount = 2;
 		eType = 'heavy';
-	} else if (rand() < 0.25) {
+	} else if (rand() < 0.25 + 0.4 /*temp*/) {
 		baseCount = 3;
 		eType = 'swift';
 	}
@@ -662,10 +662,11 @@ function summonEnemy(data) {
 			"enemy",
 			"zoneSpecific",
 			{
-				approachDistance:	rand(3,4.5),
+				approachDistance:	rand(3, 4.5),
 				nextShootTime:		0,
 				health:				eInfo.health,
 				info:				eInfo,
+				type:				data.type,
 				knockbackVec:		vec2(0,0),
 				lastHitTime:		-10,
 				poison: {
@@ -673,8 +674,17 @@ function summonEnemy(data) {
 					nextTick:			0,
 					ticksRemaining:		0,
 				},
+				special: {}
 			}
 		])
+
+		// Add special attributes
+
+		if (data.type == 'swift') {
+			newEnemy.special = {
+				strafeDirection: [-1, 1][randi()],
+			}
+		}
 
 		addCharacterShadow(newEnemy);
 	}
@@ -1200,7 +1210,7 @@ gameScene.onMouseMove(() => {
 	}
 })
 
-// ----------------------------------------- UPDATE (5 / SEC) -----------------------------------------
+// ----------------------------------------- UPDATE (5 per SEC) -----------------------------------------
 
 gameScene.loop(0.2, () => {
 	// Check for offscreen 
@@ -1217,6 +1227,14 @@ gameScene.loop(0.2, () => {
 			c.hidden = false;
 			c.paused = false;
 			on++;
+		}
+
+		// Randomly reverse enemy strafe direction
+		if (c.is('enemy') && c.type == 'swift') {
+			let chancePerSec = 0.2;
+			if (rand() < chancePerSec/5) {
+				c.special.strafeDirection *= -1;
+			} 
 		}
 	})
 
@@ -1247,7 +1265,7 @@ gameScene.onUpdate(() => {
 			// Enemy targetting/aiming
 
 			let target = player.pos;
-			let distanceToPlayer = c.pos.sdist(player.pos);
+			let distToPlayer = c.pos.dist(player.pos);
 
 			if (c.info.aimSkill == 1) {
 				target = target.add(
@@ -1259,31 +1277,89 @@ gameScene.onUpdate(() => {
 			if (c.info.aimSkill == 2) {
 				target = target.add(
 					player.moveVec.scale(
-						Math.sqrt(distanceToPlayer) * PLAYER_SPEED / BULLETS.appleSeed.speed
+						distToPlayer * PLAYER_SPEED / BULLETS.appleSeed.speed
 					)
 				);
 			}
 
 			target = borderResolve(target);
 
+			// temp target marker
+			// add([
+			// 	rect(5,5),
+			// 	pos(target),
+			// 	color(WHITE),
+			// 	lifespan(1/30),
+			// 	opacity(1),
+			// 	z(LAYERS.ui),
+			// ]);
+
 			let angle = target.angle(c.pos) - 90;
 			c.angle = angle;
 
 			// Enemy movement 
 
-			if (!c.is('superKb_victim') && distanceToPlayer > (UNIT * c.approachDistance)**2) {
-				c.pos = c.pos.add(
-					Vec2.fromAngle(angle + 90)
-					.scale(UNIT * c.info.speed * dt())
-					.scale(c.is('poisoned') ? POISON_SPEED_MULTI : 1)
-				);
+			let canApproach = distToPlayer > (UNIT * c.approachDistance);
+			let canMove = false;
+			let movementAngle = 0; // 0 = directly towards target, nonzero = strafe
+
+			if (!c.is('superKb_victim')) {
+				// Type-by-type AI
+
+				if (c.type == 'swift') {
+					// -------- Swift AI --------
+					canMove = true;
+
+					// Set ranges
+					let distRange = [(c.approachDistance), (c.approachDistance + 5)];
+					let strafeAngleRange = [20, 90];
+
+					c.use(color(GREEN))
+
+					if (distToPlayer < c.approachDistance * UNIT) {
+						// different ranges if too close to player
+						distRange = [0, c.approachDistance];
+						strafeAngleRange = [90, 250];
+						c.use(color(RED))
+					}
+
+					strafeMagnitude = mapc( // normalize distance 0 to 1
+						distToPlayer, 
+						distRange[0] * UNIT,
+						distRange[1] * UNIT,
+						1,
+						0,
+					); 
+					strafeMagnitude = easings.easeInOutQuad(strafeMagnitude); // ease normalized dist
+					strafeMagnitude = mapc(
+						strafeMagnitude, 
+						0, 1, 
+						strafeAngleRange[0], 
+						strafeAngleRange[1] // map normalized + eased distance to strafe angle
+					);
+
+					movementAngle = strafeMagnitude * c.special.strafeDirection; 
+
+				} else {
+					// -------- All other AI --------
+					if (canApproach) { canMove = true; }
+				}
+
+				if (canMove) {
+					// Move (general)
+					c.pos = c.pos.add(
+						Vec2.fromAngle(angle + 90 + movementAngle)
+						.scale(UNIT * c.info.speed * dt())
+						.scale(c.is('poisoned') ? POISON_SPEED_MULTI : 1)
+					);
+				}
 			}
 
 			processKnockback(c);
 			
 			// Enemy attack 
 
-			if (gameTime() > c.nextShootTime && distanceToPlayer < (UNIT * 5)**2) {
+			if (gameTime() > c.nextShootTime && distToPlayer < (UNIT * 5)) {
 				attack({
 					source: c,
 					type:   'appleSeed',

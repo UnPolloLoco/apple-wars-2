@@ -29,7 +29,7 @@ kaboom({
         shoot: { mouse: "left" },
         pause: { keyboard: ["p", "escape"] },
 		dash:  { keyboard: ["space"], mouse: ["right"]},
-		swap:  { keyboard: ["t"] },
+		swap:  { keyboard: ["e"] },
     },
 });
 

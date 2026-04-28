@@ -94,6 +94,7 @@ const ENEMIES = {
 		scale:		0.85,
 		aimSkill:	0,
 		kbMulti:	1,
+		special: {}
 	},
 	heavy: {
 		seeds:		['appleSeed'],
@@ -103,15 +104,17 @@ const ENEMIES = {
 		scale:		1.25,
 		aimSkill:	1,
 		kbMulti:	0.2,
+		special: {}
 	},
 	swift: {
 		seeds:		['appleSeed'],
-		speed:		3.5,
+		speed:		4.5,
 		health:		10,
 		size:		85,
 		scale:		0.7,
 		aimSkill:	1,
 		kbMulti:	1.2,
+		special: {}
 	},
 	test: {
 		seeds:		['appleSeed'],
@@ -121,6 +124,7 @@ const ENEMIES = {
 		scale:		0.85,
 		aimSkill:	0,
 		kbMulti:	1,
+		special: {}
 	},
 }
 
