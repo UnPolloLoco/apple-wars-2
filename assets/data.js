@@ -105,8 +105,10 @@ const ENEMIES = {
 		scale:			1.25,
 		aimSkill:		1,
 		kbMulti:		0.2,
-		approachDist:	[3, 4.5],
-		special: {}
+		approachDist:	[2, 3.5],
+		special: {
+			anchors: true,
+		}
 	},
 	swift: {
 		seeds:			['appleSeed'],

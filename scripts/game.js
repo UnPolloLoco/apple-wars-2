@@ -611,10 +611,10 @@ function summonEnemyWave() {
 	let baseCount = 5;
 	let eType = 'basic';
 	
-	if (rand() < 0.2) {
+	if (rand() < 0.2 + 0.5 /*temp*/) {
 		baseCount = 2;
 		eType = 'heavy';
-	} else if (rand() < 0.25 + 0.4 /*temp*/) {
+	} else if (rand() < 0.25) {
 		baseCount = 3;
 		eType = 'swift';
 	}
@@ -756,8 +756,14 @@ function attack(data) {
 	// Attack cooldown
 
 	if (s.is('enemy')) {
-		s.nextShootTime = gameTime() + 0.8;
+		if (s.special.isAnchored) {
+			s.nextShootTime = gameTime() + 0.2;
+		} else {
+			// normal enemy cooldown
+			s.nextShootTime = gameTime() + 0.8;
+		}
 	} else {
+		// normal player cooldown
 		s.nextShootTime = gameTime() + bInfo.delay * 2;
 	}
 }
@@ -1305,7 +1311,7 @@ gameScene.onUpdate(() => {
 
 				if (c.special.strafe) {
 					
-					// ------------- Strafing AI ------------
+					// ------------- Strafing AI (swift) ------------
 
 					canMove = true;
 
@@ -1313,13 +1319,13 @@ gameScene.onUpdate(() => {
 					let distRange = [(c.approachDistance), (c.approachDistance + 5)];
 					let strafeAngleRange = [20, 90];
 
-					c.use(color(GREEN))
+					// c.use(color(GREEN))
 
 					if (distToPlayer < c.approachDistance * UNIT) {
 						// different ranges if too close to player
 						distRange = [0, c.approachDistance];
 						strafeAngleRange = [90, 250];
-						c.use(color(RED))
+						// c.use(color(RED))
 					}
 
 					strafeMagnitude = mapc( // normalize distance 0 to 1
@@ -1338,6 +1344,33 @@ gameScene.onUpdate(() => {
 					);
 
 					movementAngle = strafeMagnitude * c.special.strafeDirection; 
+
+				} else if (c.special.anchors) {
+
+					// ------------- Anchoring AI (heavy) ------------
+
+					let anchorStartDist = 5;
+					let anchorEndDist = 15;
+
+					if (c.special.isAnchored) {
+						// Already anchored
+						canMove = false;
+
+						if (distToPlayer > anchorEndDist * UNIT) {
+							c.special.isAnchored = false;
+							c.unuse('color');
+						}
+
+					} else {
+						// Not anchored yet
+						if (canApproach) { canMove = true; }
+
+						if (distToPlayer < anchorStartDist * UNIT) {
+							c.special.isAnchored = true;
+							c.use(color(RED));
+						}
+
+					}
 
 				} else {
 
@@ -1361,7 +1394,7 @@ gameScene.onUpdate(() => {
 			
 			// Enemy attack 
 
-			if (gameTime() > c.nextShootTime && distToPlayer < (UNIT * 5)) {
+			if (gameTime() > c.nextShootTime && (distToPlayer < (UNIT * 5) || c.special.isAnchored)) { // infinite range if anchored
 				attack({
 					source: c,
 					type:   'appleSeed',
