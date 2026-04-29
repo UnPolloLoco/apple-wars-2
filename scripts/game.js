@@ -643,10 +643,10 @@ function summonEnemy(data) {
 		let spawnDir = rand(360);
 		let spawnDist = 18;
 
-		if (data.type == 'swift') {
-			spawnDir = clumpSpawnDir + rand(30);
-			spawnDist += rand(-1, 1);
-		}
+		// if (data.type == 'swift') {
+		// 	spawnDir = clumpSpawnDir + rand(30);
+		// 	spawnDist += rand(-1, 1);
+		// }
 
 		let newEnemy = gameScene.add([
 			sprite('enemy'),
@@ -662,7 +662,7 @@ function summonEnemy(data) {
 			"enemy",
 			"zoneSpecific",
 			{
-				approachDistance:	rand(3, 4.5),
+				approachDistance:	rand(eInfo.approachDist[0], eInfo.approachDist[1]),
 				nextShootTime:		0,
 				health:				eInfo.health,
 				info:				eInfo,
@@ -674,16 +674,14 @@ function summonEnemy(data) {
 					nextTick:			0,
 					ticksRemaining:		0,
 				},
-				special: {}
+				special: structuredClone(eInfo.special),
 			}
 		])
 
 		// Add special attributes
 
-		if (data.type == 'swift') {
-			newEnemy.special = {
-				strafeDirection: [-1, 1][randi()],
-			}
+		if (eInfo.special.strafe) {
+			newEnemy.special.strafeDirection = [-1, 1][randi()]; // 1 or -1
 		}
 
 		addCharacterShadow(newEnemy);
@@ -1230,7 +1228,7 @@ gameScene.loop(0.2, () => {
 		}
 
 		// Randomly reverse enemy strafe direction
-		if (c.is('enemy') && c.type == 'swift') {
+		if (c.is('enemy') && c.special.strafe) {
 			let chancePerSec = 0.2;
 			if (rand() < chancePerSec/5) {
 				c.special.strafeDirection *= -1;
@@ -1304,10 +1302,11 @@ gameScene.onUpdate(() => {
 			let movementAngle = 0; // 0 = directly towards target, nonzero = strafe
 
 			if (!c.is('superKb_victim')) {
-				// Type-by-type AI
 
-				if (c.type == 'swift') {
-					// -------- Swift AI --------
+				if (c.special.strafe) {
+					
+					// ------------- Strafing AI ------------
+
 					canMove = true;
 
 					// Set ranges
@@ -1341,9 +1340,12 @@ gameScene.onUpdate(() => {
 					movementAngle = strafeMagnitude * c.special.strafeDirection; 
 
 				} else {
-					// -------- All other AI --------
+
+					// ------------- All other AI ------------
+
 					if (canApproach) { canMove = true; }
 				}
+
 
 				if (canMove) {
 					// Move (general)
