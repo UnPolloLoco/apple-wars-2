@@ -95,6 +95,7 @@ const ENEMIES = {
 		aimSkill:		0,
 		kbMulti:		1,
 		approachDist:	[3, 4.5],
+		attackDist:		5,
 		special: {}
 	},
 	heavy: {
@@ -106,6 +107,7 @@ const ENEMIES = {
 		aimSkill:		1,
 		kbMulti:		0.2,
 		approachDist:	[2, 3.5],
+		attackDist:		9,
 		special: {
 			anchors: true,
 		}
@@ -119,6 +121,7 @@ const ENEMIES = {
 		aimSkill:		1,
 		kbMulti:		1.2,
 		approachDist:	[1.5, 3.5],
+		attackDist:		5,
 		special: {
 			strafe: true,
 		}
@@ -132,6 +135,7 @@ const ENEMIES = {
 		aimSkill:		0,
 		kbMulti:		1,
 		approachDist:	[3, 4.5],
+		attackDist:		5,
 		special: {}
 	},
 }

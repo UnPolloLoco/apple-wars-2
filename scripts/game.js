@@ -1349,7 +1349,7 @@ gameScene.onUpdate(() => {
 
 					// ------------- Anchoring AI (heavy) ------------
 
-					let anchorStartDist = 5;
+					let anchorStartDist = 4;
 					let anchorEndDist = 15;
 
 					if (c.special.isAnchored) {
@@ -1394,7 +1394,10 @@ gameScene.onUpdate(() => {
 			
 			// Enemy attack 
 
-			if (gameTime() > c.nextShootTime && (distToPlayer < (UNIT * 5) || c.special.isAnchored)) { // infinite range if anchored
+			let isCooldownDone = gameTime() > c.nextShootTime;
+			let isCloseEnough = distToPlayer < (UNIT * c.info.attackDist);
+
+			if (isCooldownDone && (isCloseEnough || c.special.isAnchored)) { // infinite range if anchored
 				attack({
 					source: c,
 					type:   'appleSeed',
