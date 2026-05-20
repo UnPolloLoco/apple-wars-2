@@ -107,7 +107,7 @@ const ENEMIES = {
 		aimSkill:		1,
 		kbMulti:		0.2,
 		approachDist:	[2, 3.5],
-		attackDist:		9,
+		attackDist:		7,
 		special: {
 			anchors: true,
 		}

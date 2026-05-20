@@ -611,7 +611,7 @@ function summonEnemyWave() {
 	let baseCount = 5;
 	let eType = 'basic';
 	
-	if (rand() < 0.2 + 0.5 /*temp*/) {
+	if (rand() < 0.2) {
 		baseCount = 2;
 		eType = 'heavy';
 	} else if (rand() < 0.25) {
@@ -1367,7 +1367,7 @@ gameScene.onUpdate(() => {
 
 						if (distToPlayer < anchorStartDist * UNIT) {
 							c.special.isAnchored = true;
-							c.use(color(RED));
+							c.use(color(GREEN));
 						}
 
 					}
