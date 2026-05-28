@@ -22,14 +22,15 @@ kaboom({
 	debugKey: 'i',
 	texFilter: 'linear',
 	buttons: {
-		up:    { keyboard: ["w"] },
-		left:  { keyboard: ["a"] },
-		down:  { keyboard: ["s"] },
-		right: { keyboard: ["d"] },
-        shoot: { mouse: "left" },
-        pause: { keyboard: ["p", "escape"] },
-		dash:  { keyboard: ["space"], mouse: ["right"]},
-		swap:  { keyboard: ["c"] },
+		up:      { keyboard: ["w"] },
+		left:    { keyboard: ["a"] },
+		down:    { keyboard: ["s"] },
+		right:   { keyboard: ["d"] },
+        shoot:   { mouse: ["left"] },
+        pause:   { keyboard: ["p", "escape"] },
+		dash:    { keyboard: ["space"], mouse: ["right"]},
+		swap:    { keyboard: ["c"] },
+		ability: { keyboard: ["f"] },
     },
 });
 
@@ -56,6 +57,8 @@ const ATTACK_JIGGLE_MULTI = 0.96;
 const DASH_COOLDOWN = 1.5;
 const DASH_DURATION = 0.2;
 const DASH_SPEED = 15;
+
+const ABILITY_COOLDOWN = 5;
 
 const PASSIVE_HEAL_DELAY = 1.5; // Time after taking damage until healing starts
 const HEAL_RATE = 5;

@@ -195,6 +195,7 @@ const player = gameScene.add([
 		},
 		state: 			'normal',
 		nextDashTime:	0,
+		abilityMeter:	0,
 	}
 ])
 
@@ -351,12 +352,11 @@ const abilityFillingMask = ui.add([
 	rect(UNIT*1.5, 0),
 	color(BLUE),
 	anchor('botleft'),
-	opacity(0.3),
 	fixed(),
 	z(LAYERS.ui),
 	mask(),
 	{
-		maxHeight: UNIT*1.58,
+		maxHeight: UNIT*1.54,
 	}
 ])
 
@@ -368,7 +368,7 @@ abilityFillingMask.add([
 	scale(UNIT / 150 * 1.5),
 	fixed(),
 	z(LAYERS.ui),
-	opacity(0.3),
+	opacity(0.4),
 ])
 
 // Red full icon
@@ -379,7 +379,18 @@ const abilityFull = ui.add([
 	scale(UNIT / 150 * 1.5),
 	fixed(),
 	z(LAYERS.ui + 1),
-	opacity(1),
+	opacity(0),
+])
+
+// White flash on recharge
+const abilityRechargeFlash = ui.add([
+	pos(abilityDisplay.pos),
+	sprite('abilityMeter_filling'),
+	anchor('botleft'),
+	scale(UNIT / 150 * 1.5),
+	fixed(),
+	z(LAYERS.ui + 2),
+	opacity(0),
 ])
 
 // ----------- Health Bar -----------
@@ -1205,6 +1216,14 @@ gameScene.onButtonDown('shoot', () => {
 	});
 })
 
+gameScene.onButtonPress('ability', () => {
+	if (player.abilityMeter == 1) {
+		debug.log('WOW!')
+		player.abilityMeter = 0;
+		abilityFull.opacity = 0;
+	} 
+})
+
 // ----------- Player Points to Mouse -----------
 
 gameScene.onMouseMove(() => {
@@ -1464,7 +1483,7 @@ gameScene.onUpdate(() => {
 
 		player.pos = borderResolve(player.pos);
 
-		// Player passive regen
+		// Player passive regen + health bar update
 
 		if (player.health < 100) {
 			let timeSinceHit = gameTime() - player.lastHitTime;
@@ -1488,6 +1507,31 @@ gameScene.onUpdate(() => {
 				);
 				updateHealthBar();
 			}
+		}
+
+		// Refill ability meter
+
+		if (player.abilityMeter < 1) {
+			// Filling
+			player.abilityMeter += dt() / ABILITY_COOLDOWN;
+
+			// Update ability meter visual
+			abilityFillingMask.height = player.abilityMeter * abilityFillingMask.maxHeight;
+
+		} else if (player.abilityMeter > 1) {
+			// Just filled; only run once
+			player.abilityMeter = 1;
+			debug.log('FULL')
+			abilityFull.opacity = 1;
+			// abilityRechargeFlash
+			gameScene.tween(
+				1, 0,
+				1.5,
+				(t) => {
+					abilityRechargeFlash.opacity = t;
+				},
+				easings.easeOutQuint
+			)
 		}
 
 		// Player visual effects
