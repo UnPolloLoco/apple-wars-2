@@ -1168,6 +1168,32 @@ function swapSelectedBullet() {
 	}
 }
 
+// ----------- Ability USE -----------
+
+function abilityUse() {
+	debug.log('WOW!')
+	player.abilityMeter = 0;
+	abilityFull.opacity = 0;
+}
+
+// ----------- Ability RECHARGE -----------
+
+function abilityRecharged() {
+	debug.log('FULL')
+	player.abilityMeter = 1;
+	abilityFull.opacity = 1;
+	
+	// abilityRechargeFlash
+	gameScene.tween(
+		1, 0,
+		1.5,
+		(t) => {
+			abilityRechargeFlash.opacity = t;
+		},
+		easings.easeOutQuint
+	)
+}
+
 
 
 // ----------------------------------------- MOUSE AND KEYS -----------------------------------------
@@ -1218,9 +1244,7 @@ gameScene.onButtonDown('shoot', () => {
 
 gameScene.onButtonPress('ability', () => {
 	if (player.abilityMeter == 1) {
-		debug.log('WOW!')
-		player.abilityMeter = 0;
-		abilityFull.opacity = 0;
+		abilityUse();
 	} 
 })
 
@@ -1514,24 +1538,12 @@ gameScene.onUpdate(() => {
 		if (player.abilityMeter < 1) {
 			// Filling
 			player.abilityMeter += dt() / ABILITY_COOLDOWN;
-
 			// Update ability meter visual
 			abilityFillingMask.height = player.abilityMeter * abilityFillingMask.maxHeight;
 
 		} else if (player.abilityMeter > 1) {
-			// Just filled; only run once
-			player.abilityMeter = 1;
-			debug.log('FULL')
-			abilityFull.opacity = 1;
-			// abilityRechargeFlash
-			gameScene.tween(
-				1, 0,
-				1.5,
-				(t) => {
-					abilityRechargeFlash.opacity = t;
-				},
-				easings.easeOutQuint
-			)
+			// Just filled; only runs once
+			abilityRecharged();
 		}
 
 		// Player visual effects
