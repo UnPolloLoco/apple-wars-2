@@ -1168,12 +1168,31 @@ function swapSelectedBullet() {
 	}
 }
 
+// ----------- Ability meter flash effect -----------
+
+function doAbilityMeterFlash() {
+	gameScene.tween(
+		1, 0,
+		1.2,
+		(t) => {
+			abilityRechargeFlash.opacity = t;
+		},
+		easings.easeOutQuint
+	)
+}
 // ----------- Ability USE -----------
 
 function abilityUse() {
 	debug.log('WOW!')
 	player.abilityMeter = 0;
 	abilityFull.opacity = 0;
+
+	doAbilityMeterFlash();
+
+	// temp ability
+	gameScene.get('enemy').forEach((e) => {
+		e.scale = e.scale.scale(0.5)
+	})
 }
 
 // ----------- Ability RECHARGE -----------
@@ -1182,16 +1201,8 @@ function abilityRecharged() {
 	debug.log('FULL')
 	player.abilityMeter = 1;
 	abilityFull.opacity = 1;
-	
-	// abilityRechargeFlash
-	gameScene.tween(
-		1, 0,
-		1.5,
-		(t) => {
-			abilityRechargeFlash.opacity = t;
-		},
-		easings.easeOutQuint
-	)
+
+	doAbilityMeterFlash();
 }
 
 
